@@ -1,2 +1,0 @@
-# textPlugin
-Text Plugin
