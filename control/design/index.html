@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html ng-app="textPluginDesign">
 <head lang="en">
-    <meta charset="UTF-8">
+	<!-- CSS -->
+    <link href="../../../../styles/helper.css" rel="stylesheet">
+    <link href="../../../../styles/siteIcons.css" rel="stylesheet">
+    
+	<!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
+
+    <meta charset="UTF-8">
 </head>
 <body ng-controller="textPluginCtrl">
 
-	<div class="item clearfix">
-		<div class="labels pull-left">
-			<label>Image Carousel</label>
+	<div class="item clearfix row">
+		<div class="labels col-md-3 pull-left">
+			<span>Image Carousel</span>
 		</div>
-		<div class="main pull-right">
+		<div class="main col-md-9 pull-right padding-right-zero">
 			<div class="clearfix">
-				<a href="#" class="btn btn-success pull-left">Add Image</a>
+				<a class="btn btn-success pull-left" onclick="alert('Open Media Library');">Add Image</a>
 			</div>
-			<div class="carousel-items draggable-list-view margin-top-twenty border-grey border-radius-four">
+			<div class="carousel-items draggable-list-view margin-top-twenty border-radius-four border-grey">
 				<div class="d-item">
 					<span class="icon icon-menu"></span>
 					<img src="http://www.placehold.it/80x50" class="border-radius-four border-grey">
 					<div class="copy pull-right">
 						<span class="title ellipsis">Image Title</span>
-						<a href="#" class="text-primary text">Link</a>
-						<span class="btn-icon btn-minus-icon btn-danger transition-third"><span>
+						<a class="text-primary text" onclick="window.openDialog('deepLink.html', null, 'sm', null)">Link</a>											
+						<span class="btn-icon btn-delete-icon btn-danger transition-third" onclick="window.openDialog('remove.html', null, 'sm', null)"><span>
 					</div>
 				</div>
 				<div class="d-item">
@@ -30,8 +36,8 @@
 					<img src="http://www.placehold.it/80x50" class="border-radius-four border-grey">
 					<div class="copy pull-right">
 						<span class="title ellipsis">Image Title</span>
-						<a href="#" class="text-primary text">Link</a>
-						<span class="btn-icon btn-minus-icon btn-danger transition-third"><span>
+						<a class="text-primary text" onclick="window.openDialog('deepLink.html', null, 'sm', null)">Link</a>											
+						<span class="btn-icon btn-delete-icon btn-danger transition-third" onclick="window.openDialog('remove.html', null, 'sm', null)"><span>
 					</div>
 				</div>
 				<div class="d-item">
@@ -39,8 +45,8 @@
 					<img src="http://www.placehold.it/80x50" class="border-radius-four border-grey">
 					<div class="copy pull-right">
 						<span class="title ellipsis">Image Title</span>
-						<a href="#" class="text-primary text">Link</a>
-						<span class="btn-icon btn-minus-icon btn-danger transition-third"><span>
+						<a class="text-primary text" onclick="window.openDialog('deepLink.html', null, 'sm', null)">Link</a>											
+						<span class="btn-icon btn-delete-icon btn-danger transition-third" onclick="window.openDialog('remove.html', null, 'sm', null)"><span>
 					</div>
 				</div>
 				<div class="d-item">
@@ -48,8 +54,8 @@
 					<img src="http://www.placehold.it/80x50" class="border-radius-four border-grey">
 					<div class="copy pull-right">
 						<span class="title ellipsis">Image Title</span>
-						<a href="#" class="text-primary text">Link</a>
-						<span class="btn-icon btn-minus-icon btn-danger transition-third"><span>
+						<a class="text-primary text" onclick="window.openDialog('deepLink.html', null, 'sm', null)">Link</a>											
+						<span class="btn-icon btn-delete-icon btn-danger transition-third" onclick="window.openDialog('remove.html', null, 'sm', null)"><span>
 					</div>
 				</div>
 			</div>
