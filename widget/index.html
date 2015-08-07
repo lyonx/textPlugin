@@ -1,52 +1,53 @@
 <!DOCTYPE html>
-<html ng-App="textPlugin">
-<head lang="en">
-    <meta charset="UTF-8">
-    <title>example Text widget</title>
+<html lang="en" ng-app="buildfire" >
+<head>
 
-    <script src="../../../scripts/angular/angular.min.js"></script>
-    <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
+    <!-- CSS -->
+    <link rel="stylesheet" href="../../../../styles/bootstrap.css">
+    <link rel="stylesheet" href="../../../../styles/siteIcons.css">
+    <link rel="stylesheet" href="../../../../styles/appStyle.css">
+    <link rel="stylesheet" href="../../../../styles/helper.css">
+    
+   	<!-- jQuery & Owl Carousel -->
+	<script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>    
+	<script src="../../../scripts/owlCarousel/owlCarousel.js"></script>
+    <link rel="stylesheet" href="../../../../scripts/owlCarousel/owlCarousel.css">
 
-    <style>
-        .style1{
-            border: 5px solid red;
-        }
-
-        .style2{
-            border: 5px solid blue;
-        }
-    </style>
+    <!-- Meta -->
+	<meta charset="utf-8">
 </head>
-<body>
-<div ng-controller="textPluginCtrl" ng-cloak style="background-image: url({{data.imageUrl}});" class="{{data.design.style}}" >
-    {{data.text}}
-</div>
-<script>
-
-    var textPluginApp = angular.module('textPlugin', []);
-
-    textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-        /*
-         * Go pull saved data
-         * */
-        buildfire.datastore.get(function (err, data) {
-
-            $scope.data = data;
-            $scope.$digest();
-
-        });
-
-        /*
-         Listen in if an update occurred on the control panel
-         */
-        buildfire.datastore.onUpdate(function (e) {
-            $scope.data = e.detail.obj;
-            $scope.$digest();
-        });
-
-        buildfire.analytics.trackAction('widget loaded');
-    }]);
+<script type="text/javascript" charset="utf-8">
+	$(function(){
+		var slides = $('.plugin-slider .plugin-slide').length;
+		
+		// Slider needs at least 2 slides or you'll get an error.
+		if(slides > 1){
+			$('.plugin-slider').owlCarousel({
+				loop:true,
+				nav:false,
+				items:1
+			});	
+		}
+	})
 </script>
-
-</body>
+<div class="holder padding-zero">
+	<div class="text-plugin layout1">
+		<div class="text-banner clearfix border-bottom-grey">
+			<div class="plugin-slider text-center">
+				<div class="plugin-slide">
+					<img src="http://www.placehold.it/1280x720.jpg">
+				</div>
+				<div class="plugin-slide">
+					<img src="http://www.placehold.it/1280x720.jpg">
+				</div>
+				<div class="plugin-slide">
+					<img src="http://www.placehold.it/1280x720.jpg">
+				</div>
+			</div>
+		</div>				
+		<div class="padded">
+			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+		</div>
+	</div>
+</div>
 </html>
