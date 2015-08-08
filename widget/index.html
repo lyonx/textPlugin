@@ -1,52 +1,101 @@
 ﻿<!DOCTYPE html>
-<html ng-App="textPlugin">
+<html ng-app="textPlugin">
 <head lang="en">
     <meta charset="UTF-8">
     <title>example Text widget</title>
 
     <script src="../../../scripts/angular/angular.min.js"></script>
+    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
-
-    <style>
-        .style1{
-            border: 5px solid red;
-        }
-
-        .style2{
-            border: 5px solid blue;
-        }
-    </style>
+    <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
+    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
 </head>
 <body>
-<div ng-controller="textPluginCtrl" ng-cloak style="background-image: url({{data.imageUrl}});" class="{{data.design.style}}" >
-    {{data.text}}
-</div>
-<script>
+    <div ng-controller="textPluginCtrl" ng-cloak style="background-image: url({{ resizeImage(data.design.backgroundImage, null, deviceHeight) }}); height: 100%;">
+        <div id="owl-demo" class="owl-carousel owl-theme">
+            <div class="item" ng-repeat="item in data.content.carouselImages">
+                <img src="{{ resizeImage(item.iconUrl, deviceWidth) }}" alt="{{ item.title }} ">
+            </div>
+        </div>
+        <div ng-bind-html="data.content.text"></div>
+    </div>
+    <script>
 
-    var textPluginApp = angular.module('textPlugin', []);
+        var textPluginApp = angular.module('textPlugin', []);
 
-    textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-        ///*
-        // * Go pull saved data
-        // * */
-        //buildfire.datastore.get(function (err, data) {
+        textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+            $scope.deviceWidth = window.innerWidth;
+            $scope.deviceHeight = window.innerHeight;
+            var updateSlider = false;
+            /*
+            * bind data to scope
+            * */
+            function bind(data) {
+                $scope.data = data;
+                if (data && data.content && data.content.text) {
+                    $scope.data.content.text = $sce.trustAsHtml(data.content.text);
+                }
+                $scope.$digest();
 
-        //    $scope.data = data;
-        //    $scope.$digest();
+                if (updateSlider) {
+                    $("#owl-demo").data('owlCarousel').destroy();
+                }
 
-        //});
+                $("#owl-demo").owlCarousel({
 
-        ///*
-        // Listen in if an update occurred on the control panel
-        // */
-        //buildfire.datastore.onUpdate(function (e) {
-        //    $scope.data = e.detail.obj;
-        //    $scope.$digest();
-        //});
+                    navigation: false,
+                    slideSpeed: 300,
+                    paginationSpeed: 400,
+                    singleItem: true,
+                    pagination: false,
+                    items: 1,
+                    itemsMobile: true
 
-        //buildfire.analytics.trackAction('widget loaded');
-    }]);
-</script>
+                });
+            }
+
+            /*
+             * Go pull saved data
+             * */
+            function loadData() {
+                buildfire.datastore.get(function (err, result) {
+                    if (result) bind(result.data);
+                });
+            }
+
+            loadData();
+
+
+            /**
+             * when a refresh is triggered get reload data
+             */
+            buildfire.datastore.onRefresh(loadData);
+
+            buildfire.datastore.onUpdate(function (e) {
+                updateSlider = true;
+                loadData();
+            });
+
+            //buildfire.analytics.trackAction('widget loaded');
+
+            $scope.resizeImage = function (url, width, height) {
+                var options = {};
+                if (!url) {
+                    return "";
+                }
+                else {
+                    if (width) {
+                        options.width = width;
+                    }
+
+                    if (height) {
+                        options.height = height;
+                    }
+                    return buildfire.imageLib.resizeImage(url, options);
+                }
+            };
+        }]);
+    </script>
 
 </body>
 </html>
