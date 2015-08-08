@@ -1,142 +1,169 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-app="textPlugin">
 <head lang="en">
-	<!-- CSS -->
+    <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
     <link href="../../../../styles/siteIcons.css" rel="stylesheet">
-    
-	<!-- JS -->
+    <link href="./css/ng-sortable.min.css" rel="stylesheet">
+    <link href="./css/ng-sortable.style.min.css" rel="stylesheet">
+    <!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
+    <script src="../../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
     <script src="../../../../scripts/angular/ui-bootstrap.min.js"></script>
     <script src="../../../../scripts/tinymce/tinymce.min.js"></script>
     <script src="../../../../scripts/tinymce/ui-tinymce.js"></script>
-
+    <style>
+        [ng-cloak] {
+            display: none !important;
+        }
+    </style>
+    <script src="./js/ng-sortable.js"></script>
     <meta charset="UTF-8">
 </head>
-<body ng-controller="textPluginCtrl">
-	<div class="item clearfix row">
-		<div class="labels col-md-3 padding-right-zero pull-left">
-			<span>Text</span>
-		</div>
-	</div>
-	<hr class="none">
-	<div class="item clearfix row">
-		<div class="main col-md-12 pull-left">
+<body ng-controller="textPluginCtrl" ng-cloak>
+    <div class="item clearfix row margin-bottom-fifteen">
+        <div class="labels col-md-3 padding-right-zero pull-left">
+            <span>Image Carousel</span>
+        </div>
+        <div class="col-md-9 pull-left">
+            <button type="button" class="btn btn-primary" ng-click="addCarouselImage()">
+                <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+                Add Image
+            </button>
+        </div>
+    </div>
+
+    <div class="item clearfix row margin-bottom-fifteen" ng-show="carouselImages.length > 0">
+        <div class="col-md-9 pull-right">
+            <div as-sortable="sortableOptions" ng-model="carouselImages">
+                <div ng-repeat="slide in carouselImages" as-sortable-item class="d-item as-sortable-item">
+                    <div as-sortable-item-handle class="as-sortable-item-handle" style="height:50px">
+                        <span class="icon icon-menu"></span>
+                        <img src="{{ resizeImage(slide.data.iconUrl) }}" class="border-radius-four border-grey">
+                        <div class="copy pull-right">
+                            <span class="title ellipsis">
+                                {{ slide.data.title }}
+                            </span>
+                            <a ng-click="editSlide(slide)">
+                                link
+                            </a>
+                            <span class="btn-icon btn-delete-icon btn-danger transition-third" onclick="window.openDialog('remove.html', null, 'sm', null)">
+                                <span>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="item clearfix row margin-bottom-fifteen">
+        <div class="main col-md-12 pull-left">
             <textarea id="text" ui-tinymce class="form-control" rows="5" width="100%" ng-model="data.content.text"></textarea>
-		</div>
-	</div>
-<script>
-    var textPluginApp = angular.module('textPlugin', ['ui.bootstrap', 'ui.tinymce']);
+        </div>
+    </div>
+    <div class="item clearfix row">
+        <div class="col-md-9 pull-left">
+            <button type="button" class="btn btn-success" ng-click="save()">
+                <span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span>
+                Save
+            </button>
+        </div>
+    </div>
+    <script>
 
-    textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
+        var textPluginApp = angular.module('textPlugin', ['ui.bootstrap', 'ui.tinymce', 'ui.sortable']);
 
-        /*
-         * Go pull any previously saved data
-         * */
-        buildfire.datastore.get(function (err, result) {
-            if (result) {
-                $scope.data = result.data;
-                $scope.id = result.id;
-                $scope.$digest();
-                if (tmrDelay)clearTimeout(tmrDelay);
-            }
-            /*
-             * watch for changes in data and trigger the saveDataWithDelay function on change
-             * */
-            $scope.$watch('data', saveDataWithDelay, true);
-        });
+        textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
 
-        /*
-         * Call the datastore to save the data object
-         */
-        var saveData = function (newObj) {
+            $scope.carouselImages = [];
 
-            if (newObj == undefined)return;
-            if ($scope.frmMain.$invalid) {
-                console.warn('invalid data, no save');
-                return;
-            }
-
-            buildfire.datastore.save(newObj, function (err, result) {
-                if (err || !result)
-                    alert(JSON.stringify(err));
-                else
-                    console.log('data saved');
-            });
-        };
-
-        /*
-         * create an artificial delay so api isnt called on every character entered
-         * */
-        var tmrDelay = null;
-        var saveDataWithDelay = function (newObj,oldObj) {
-            if(newObj == oldObj)
-                return;
-            if (tmrDelay)clearTimeout(tmrDelay);
-            tmrDelay = setTimeout(function () {
-                saveData(newObj);
-            }, 500);
-        };
-
-        /*
-         * this is a way you can update only one property without sending the entire object
-         * */
-        $scope.approve = function () {
-            if ($scope.id)
-                buildfire.datastore.update($scope.id, {$set: {"content.approvedOn": new Date()}});
-        };
-
-
-        /*
-         * Open Image Lib
-         */
-        $scope.openImageLib = function () {
-            buildfire.imageLib.showDialog({showIcons: false, multiSelection: false}, function (error, result) {
-                if (result && result.selectedFiles && result.selectedFiles.length > 0) {
-                    $scope.data.content.bgURL = result.selectedFiles[0];
-                    $scope.$apply();
+            $scope.sortableOptions = {
+                containment: '#sortable-container',
+                orderChanged: function (e, ui) {
+                    console.log(e, ui);
                 }
-            });
-        }
-
-        /*
-         * Open action dialog
-         */
-        $scope.openActionDialog = function () {
-            var actionItem = {
-                title: "build fire",
-                "url": "https://www.facebook.com/buildfireapps",
-                action: "linkToWeb",
-                openIn: "browser",
-                actionName: "Link to Web Content"
             };
-            var options = {showIcon: true};
-            buildfire.actionItems.showDialog(null, options, function (err, actionItem) {
-                if (err)
-                    console.log(err);
-                else {
-                    debugger;
-                    if (!$scope.data.actionItems)
-                        $scope.data.actionItems = [];
-                    $scope.data.actionItems.push(actionItem);
-                    $scope.$apply();
+
+            /*
+            * Get all the slide images stored in the application
+            */
+            buildfire.datastore.search({}, 'slider', function (err, result) {
+                if (err) {
+                    console.error('Error loading slider images: ', err);
                 }
-
+                else {
+                    $scope.carouselImages = result;
+                    $scope.$digest();
+                    return;
+                    // this code will be used to delete images
+                    for (var i = 0; i < result.length; i++) {
+                        console.info(result[i].id)
+                        buildfire.datastore.delete(result[i].id, 'slider', function (err, status) {
+                            if (err)
+                                console.info('there was a problem deleteing your data');
+                            else
+                                console.info(' record deleted');
+                        });
+                    }
+                }
             });
-        };
 
-        $scope.resizeImage = function(url){
-            if(!url)
-                return "";
-            else
-                return buildfire.imageLib.resizeImage(url,{width:32});
-        };
+            /*
+            * Edit single slider image details
+            */
+            $scope.editSlide = function (slide) {
+                alert(JSON.stringify(slide));
+            };
 
+            /*
+            * Get image thumbnail
+            */
+            $scope.resizeImage = function (url) {
+                if (!url)
+                    return "";
+                else
+                    return buildfire.imageLib.resizeImage(url, { width: 80, height: 40 });
+            };
 
+            /*
+            * Open a dialog to add a new image to the slider
+            */
+            $scope.addCarouselImage = function () {
+                var options = { showIcon: true };
+                buildfire.actionItems.showDialog(null, options, function (err, actionItem) {
+                    if (err)
+                        console.log(err);
+                    else {
+                        console.info(actionItem);
+                        if (actionItem) {
+                            actionItem.order = $scope.carouselImages.length + 1;
+                            buildfire.datastore.insert(actionItem, 'slider', false, function (err, result) {
+                                $scope.carouselImages.push({ id: result.id, data: actionItem });
+                                $scope.$apply();
+                            });
+                        }
+                    }
+                });
+            };
 
-    }]);
-    
-</script>
+            /*
+            * Save all the details of the slide
+            * Note: this will be removed
+            */
+            $scope.save = function () {
+                console.log($scope.carouselImages);
+                buildfire.datastore.bulkInsert($scope.carouselImages, 'slider', function (err, data) {
+                    if (err)
+                        alert('there was a problem saving your data');
+                    else
+                        alert(JSON.stringify(data) + ' saved successfully');
+                });
+            };
+        }]);
+
+    </script>
 </body>
 </html>

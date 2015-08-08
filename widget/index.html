@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-App="textPlugin">
 <head lang="en">
     <meta charset="UTF-8">
@@ -26,25 +26,25 @@
     var textPluginApp = angular.module('textPlugin', []);
 
     textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-        /*
-         * Go pull saved data
-         * */
-        buildfire.datastore.get(function (err, data) {
+        ///*
+        // * Go pull saved data
+        // * */
+        //buildfire.datastore.get(function (err, data) {
 
-            $scope.data = data;
-            $scope.$digest();
+        //    $scope.data = data;
+        //    $scope.$digest();
 
-        });
+        //});
 
-        /*
-         Listen in if an update occurred on the control panel
-         */
-        buildfire.datastore.onUpdate(function (e) {
-            $scope.data = e.detail.obj;
-            $scope.$digest();
-        });
+        ///*
+        // Listen in if an update occurred on the control panel
+        // */
+        //buildfire.datastore.onUpdate(function (e) {
+        //    $scope.data = e.detail.obj;
+        //    $scope.$digest();
+        //});
 
-        buildfire.analytics.trackAction('widget loaded');
+        //buildfire.analytics.trackAction('widget loaded');
     }]);
 </script>
 
