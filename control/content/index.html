@@ -22,11 +22,12 @@
             border: 0;
             border-top: 1px solid #ddd;
             border-radius: 0;
+            padding: 10px 20px;
         }
 
-        #textApp .as-sortable-item.d-item:first-child {
-            border-top: 0;
-        }
+            #textApp .as-sortable-item.d-item:first-child {
+                border-top: 0;
+            }
 
         #textApp .as-sortable-placeholder {
             border-radius: 0;
@@ -40,7 +41,7 @@
 </head>
 <body ng-controller="textPluginCtrl" id="textApp">
     <div ng-form="frmMain">
-	
+
         <div class="item clearfix row margin-bottom-fifteen">
             <div class="labels col-md-3 padding-right-zero pull-left">
                 <span>Image Carousel</span>
@@ -59,7 +60,7 @@
             <div class="main col-md-12">
                 <div as-sortable="sortableOptions" ng-model="items" class="carousel-items draggable-list-view margin-top-twenty border-radius-four border-grey">
                     <div ng-repeat="item in items" as-sortable-item class="as-sortable-item d-item">
-                        <div as-sortable-item-handle class="as-sortable-item-handle" style="height:50px">
+                        <div as-sortable-item-handle class="as-sortable-item-handle" style="height:36px;">
                             <span class="icon icon-menu pull-left"></span>
                             <div class="media-holder pull-left">
                                 <img src="{{ resizeImage(item.iconUrl) }}" class="border-radius-four border-grey">
@@ -95,13 +96,12 @@
         var textPluginApp = angular.module('textPlugin', ['ui.bootstrap', 'ui.tinymce', , 'ui.sortable']);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-		
+
             $scope.items = [];
 
             $scope.sortableOptions = {
-                containment: '#sortable-container',
                 orderChanged: function (e, ui) {
-                    console.log(e, ui);
+                    console.info('Order change event details: ', e, ui);
                 }
             };
 
@@ -115,6 +115,14 @@
                     $scope.items = $scope.data.content.carouselImages;
                     $scope.$apply();
                     if (tmrDelay) clearTimeout(tmrDelay);
+                } else {
+                    $scope.data = {
+                        content: {
+                            carouselImages: []
+                        }
+                    };
+
+                    $scope.items = $scope.data.content.carouselImages;
                 }
                 /*
                  * watch for changes in data and trigger the saveDataWithDelay function on change
@@ -128,15 +136,17 @@
             var saveData = function (newObj) {
                 if (newObj == undefined) return;
                 if ($scope.frmMain.$invalid) {
-                    console.warn('invalid data, no save');
+                    console.warn('invalid data, details will not be saved');
                     return;
                 }
 
                 buildfire.datastore.save(newObj, function (err, result) {
-                    if (err || !result)
-                        console.error(JSON.stringify(err));
-                    else
-                        console.log('data saved');
+                    if (err || !result) {
+                        console.error('Error saving the widget details: ', err);
+                    }
+                    else {
+                        console.info('Widget details saved');
+                    }
                 });
             };
 
@@ -153,12 +163,12 @@
 
             /*
             * Open a dialog to add a new image to the slider
-            */
+            * */
             $scope.addCarouselImage = function () {
                 var options = { showIcon: true };
                 buildfire.actionItems.showDialog(null, options, function (err, actionItem) {
                     if (err)
-                        console.log(err);
+                        console.error('Error saving slider: ', err);
                     else {
                         console.info(actionItem);
                         if (actionItem) {
@@ -173,6 +183,9 @@
                 });
             };
 
+            /*
+            * Resize display image to thumbnail size
+            * */
             $scope.resizeImage = function (url) {
                 if (!url) {
                     return "";
@@ -182,16 +195,22 @@
                 }
             };
 
+            /*
+            * Delete an image from the slider
+            * */
             $scope.deleteSlider = function (index) {
                 $scope.data.content.carouselImages.splice(index, 1);
                 $scope.$apply();
             }
 
+            /*
+            * Option actionItem to edit the details of a slider
+            * */
             $scope.editSlider = function (index) {
                 var options = { showIcon: true };
                 buildfire.actionItems.showDialog($scope.data.content.carouselImages[index], options, function (err, actionItem) {
                     if (err)
-                        console.error(err);
+                        console.error('Error load actionItem: ', err);
                     else {
                         if (actionItem) {
                             $scope.data.content.carouselImages[index] = actionItem;

@@ -8,50 +8,80 @@
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
+
     <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
+    <style>
+        .widget-content {
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
     <div ng-controller="textPluginCtrl" ng-cloak style="background-image: url({{ resizeImage(data.design.backgroundImage, null, deviceHeight) }}); height: 100%;">
-        <div id="owl-demo" class="owl-carousel owl-theme">
-            <div class="item" ng-repeat="item in data.content.carouselImages">
-                <img src="{{ resizeImage(item.iconUrl, deviceWidth) }}" alt="{{ item.title }} ">
+        <div id="owl-demo" class="owl-carousel owl-theme" ng-show="data.content.carouselImages.length">
+            <div class="item" ng-repeat="item in data.content.carouselImages" data-index="{{ $index }}" ng-click="optionAction($index)">
+                <img src="{{ resizeImage(item.iconUrl, null, sliderHeight) }}" alt="{{ item.title }} ">
             </div>
         </div>
-        <div ng-bind-html="data.content.text"></div>
+        <div ng-bind-html="data.content.text" class="widget-content"></div>
     </div>
     <script>
 
         var textPluginApp = angular.module('textPlugin', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+            /*
+            * Get the required details about the device
+            * */
             $scope.deviceWidth = window.innerWidth;
             $scope.deviceHeight = window.innerHeight;
-            var updateSlider = false;
+            $scope.sliderHeight = Math.floor($scope.deviceHeight * 0.35);
+
             /*
-            * bind data to scope
+            * Check if we need to destroy and re-create the slider again
+            * */
+            var updateSlider = false;
+
+            $scope.optionAction = function (index) {
+                buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
+                    if (err)
+                        console.warn('Error openning slider action: ', err);
+                });
+            };
+
+            /*
+            * bind data to the scope
             * */
             function bind(data) {
+                var slider = $("#owl-demo");
                 $scope.data = data;
+
                 if (data && data.content && data.content.text) {
                     $scope.data.content.text = $sce.trustAsHtml(data.content.text);
                 }
+
                 $scope.$digest();
 
-                if (updateSlider) {
-                    $("#owl-demo").data('owlCarousel').destroy();
+                if (updateSlider && slider.length) {
+                    var sliderData = slider.data('owlCarousel');
+                    if (sliderData) {
+                        sliderData.destroy();
+                    }
                 }
 
-                $("#owl-demo").owlCarousel({
+                if (slider.length) {
+                    $("#owl-demo").owlCarousel({
+                        navigation: false,
+                        dots: false,
+                        slideSpeed: 300,
+                        paginationSpeed: 400,
+                        singleItem: true,
+                        pagination: false,
+                        items: 1,
+                        itemsMobile: true
 
-                    navigation: false,
-                    slideSpeed: 300,
-                    paginationSpeed: 400,
-                    singleItem: true,
-                    pagination: false,
-                    items: 1,
-                    itemsMobile: true
-
-                });
+                    });
+                }
             }
 
             /*
@@ -65,7 +95,6 @@
 
             loadData();
 
-
             /**
              * when a refresh is triggered get reload data
              */
@@ -76,8 +105,9 @@
                 loadData();
             });
 
-            //buildfire.analytics.trackAction('widget loaded');
-
+            /*
+            * A helper to resie the background and slider images
+            * */
             $scope.resizeImage = function (url, width, height) {
                 var options = {};
                 if (!url) {
@@ -96,6 +126,5 @@
             };
         }]);
     </script>
-
 </body>
 </html>

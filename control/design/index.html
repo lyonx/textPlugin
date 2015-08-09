@@ -1,6 +1,8 @@
 ﻿<!DOCTYPE html>
 <html ng-app="textPluginDesign">
 <head lang="en">
+    <meta charset="UTF-8">
+
     <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
     <link href="../../../../styles/siteIcons.css" rel="stylesheet">
@@ -8,7 +10,7 @@
     <!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
-    <meta charset="UTF-8">
+
 </head>
 <body ng-controller="textPluginCtrl">
     <div ng-form="frmMain">
@@ -34,6 +36,7 @@
         var textPluginApp = angular.module('textPluginDesign', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
+
             /*
             * Go pull any previously saved data
             * */
@@ -52,19 +55,21 @@
 
             /*
              * Call the datastore to save the data object
-             */
+             * */
             var saveData = function (newObj) {
                 if (newObj == undefined) return;
                 if ($scope.frmMain.$invalid) {
-                    console.warn('invalid data, no save');
+                    console.warn('invalid data, details will not be saved');
                     return;
                 }
 
                 buildfire.datastore.save(newObj, function (err, result) {
-                    if (err || !result)
-                        console.error(JSON.stringify(err));
-                    else
-                        console.log('data saved');
+                    if (err || !result) {
+                        console.error('Error saving the widget details: ', err);
+                    }
+                    else {
+                        console.info('Widget details saved');
+                    }
                 });
             };
 
@@ -81,7 +86,7 @@
 
             /*
             * Open a dailog to change the background image
-            */
+            * */
             $scope.changeBackground = function () {
                 buildfire.imageLib.showDialog({ showIcons: false, multiSelection: false }, function (error, result) {
                     if (result && result.selectedFiles && result.selectedFiles.length > 0) {
@@ -96,7 +101,7 @@
 
             /*
             * Get background image thumbnail
-            */
+            * */
             $scope.resizeImage = function (url) {
                 if (!url) {
                     return "";
@@ -108,7 +113,7 @@
 
             /*
             * Delete the background and back to the default white background
-            */
+            * */
             $scope.deleteBackground = function () {
                 $scope.data.design.backgroundImage = "";
             };
