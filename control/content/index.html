@@ -113,7 +113,9 @@
                     $scope.data = result.data;
                     $scope.id = result.id;
                     $scope.items = $scope.data.content.carouselImages;
-                    $scope.$apply();
+                    if (!$scope.$$phase && !$scope.$root.$$phase) {
+                        $scope.$apply();
+                    }
                     if (tmrDelay) clearTimeout(tmrDelay);
                 } else {
                     $scope.data = {
@@ -177,7 +179,10 @@
                             }
                             actionItem.order = $scope.data.content.carouselImages.length + 1;
                             $scope.data.content.carouselImages.push(actionItem);
-                            $scope.$apply();
+
+                            if (!$scope.$$phase && !$scope.$root.$$phase) {
+                                $scope.$apply();
+                            }
                         }
                     }
                 });
@@ -200,7 +205,9 @@
             * */
             $scope.deleteSlider = function (index) {
                 $scope.data.content.carouselImages.splice(index, 1);
-                $scope.$apply();
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
             }
 
             /*
@@ -214,7 +221,9 @@
                     else {
                         if (actionItem) {
                             $scope.data.content.carouselImages[index] = actionItem;
-                            $scope.$apply();
+                            if (!$scope.$$phase && !$scope.$root.$$phase) {
+                                $scope.$apply();
+                            }
                         }
                     }
                 });

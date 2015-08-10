@@ -94,7 +94,9 @@
                             $scope.data.design = {};
                         }
                         $scope.data.design.backgroundImage = result.selectedFiles[0];
-                        $scope.$apply();
+                        if (!$scope.$$phase && !$scope.$root.$$phase) {
+                            $scope.$apply();
+                        }
                     }
                 });
             };

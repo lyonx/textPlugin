@@ -10,20 +10,30 @@
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
 
     <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
-    <style>
-        .widget-content {
-            padding: 10px;
-        }
-    </style>
 </head>
 <body>
-    <div ng-controller="textPluginCtrl" ng-cloak style="background-image: url({{ resizeImage(data.design.backgroundImage, null, deviceHeight) }}); height: 100%;">
-        <div id="owl-demo" class="owl-carousel owl-theme" ng-show="data.content.carouselImages.length">
+    <div id="wrapper" ng-controller="textPluginCtrl" ng-cloak>
+        <div id="owl-demo" class="owl-carousel owl-theme" ng-hide="data.content.carouselImages.length == 0">
             <div class="item" ng-repeat="item in data.content.carouselImages" data-index="{{ $index }}" ng-click="optionAction($index)">
-                <img src="{{ resizeImage(item.iconUrl, null, sliderHeight) }}" alt="{{ item.title }} ">
+                <img ng-src="{{ resizeImage(item.iconUrl, sliderHeight) }}" alt="{{ item.title }} ">
             </div>
         </div>
         <div ng-bind-html="data.content.text" class="widget-content"></div>
+        <style>
+            .widget-content {
+                padding: 10px;
+            }
+
+            .owl-carousel .owl-item, .owl-carousel .owl-item .item, .owl-carousel .owl-item img {
+                height: {{ sliderHeight }}px;
+                width: 100%;
+            }
+
+            #wrapper {
+                {{ data.design.backgroundImage ? 'background-image: url(' + resizeImage(data.design.backgroundImage, deviceHeight) + ')' : '' }};
+                height: 100%;
+            }
+        </style>
     </div>
     <script>
 
@@ -33,9 +43,18 @@
             /*
             * Get the required details about the device
             * */
-            $scope.deviceWidth = window.innerWidth;
             $scope.deviceHeight = window.innerHeight;
-            $scope.sliderHeight = Math.floor($scope.deviceHeight * 0.35);
+            // 9/16 is best ration to the slider height
+            $scope.sliderHeight = Math.floor($scope.deviceHeight * 0.5625);
+
+            $scope.data = {
+                content: {
+                    carouselImages: []
+                },
+                design: {
+                    backgroundImage: null
+                }
+            };
 
             /*
             * Check if we need to destroy and re-create the slider again
@@ -44,8 +63,9 @@
 
             $scope.optionAction = function (index) {
                 buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
-                    if (err)
+                    if (err) {
                         console.warn('Error openning slider action: ', err);
+                    }
                 });
             };
 
@@ -60,17 +80,22 @@
                     $scope.data.content.text = $sce.trustAsHtml(data.content.text);
                 }
 
-                $scope.$digest();
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
 
-                if (updateSlider && slider.length) {
-                    var sliderData = slider.data('owlCarousel');
+                //$scope.$digest();
+
+                var sliderData = slider.data('owlCarousel');
+
+                if (slider.length && sliderData) {
                     if (sliderData) {
                         sliderData.destroy();
                     }
                 }
 
                 if (slider.length) {
-                    $("#owl-demo").owlCarousel({
+                    var sliderOptions = {
                         navigation: false,
                         dots: false,
                         slideSpeed: 300,
@@ -78,9 +103,17 @@
                         singleItem: true,
                         pagination: false,
                         items: 1,
-                        itemsMobile: true
+                        itemsMobile: true,
+                        autoHeight: false
+                    };
 
-                    });
+                    if (data.content.carouselImages.length > 1) {
+                        sliderOptions.autoplay = 3000;
+                        sliderOptions.autoplaySpeed = 500;
+                        sliderOptions.loop = true;
+                    }
+
+                    $("#owl-demo").owlCarousel(sliderOptions);
                 }
             }
 
@@ -108,20 +141,12 @@
             /*
             * A helper to resie the background and slider images
             * */
-            $scope.resizeImage = function (url, width, height) {
-                var options = {};
+            $scope.resizeImage = function (url, height) {
                 if (!url) {
                     return "";
                 }
                 else {
-                    if (width) {
-                        options.width = width;
-                    }
-
-                    if (height) {
-                        options.height = height;
-                    }
-                    return buildfire.imageLib.resizeImage(url, options);
+                    return buildfire.imageLib.resizeImage(url, { height: height });
                 }
             };
         }]);
