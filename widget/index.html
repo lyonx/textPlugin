@@ -4,48 +4,78 @@
     <meta charset="UTF-8">
     <title>example Text widget</title>
 
+    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
+
     <script src="../../../scripts/angular/angular.min.js"></script>
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
-
-    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="wrapper" ng-controller="textPluginCtrl" ng-cloak>
-        <div id="owl-demo" class="owl-carousel owl-theme" ng-hide="data.content.carouselImages.length == 0">
-            <div class="item" ng-repeat="item in data.content.carouselImages" data-index="{{ $index }}" ng-click="optionAction($index)">
-                <img ng-src="{{ resizeImage(item.iconUrl, sliderHeight) }}" alt="{{ item.title }} ">
-            </div>
-        </div>
+    <div id="wrapper" ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + resizeImage(data.design.backgroundImage, deviceHeight) + ')' : '' }}; height: 100%;">
+        <div id="owlSlider"></div>
         <div ng-bind-html="data.content.text" class="widget-content"></div>
         <style>
             .widget-content {
                 padding: 10px;
             }
 
-            .owl-carousel .owl-item, .owl-carousel .owl-item .item, .owl-carousel .owl-item img {
+            .owl-carousel .owl-item img {
                 height: {{ sliderHeight }}px;
                 width: 100%;
             }
-
-            #wrapper {
-                {{ data.design.backgroundImage ? 'background-image: url(' + resizeImage(data.design.backgroundImage, deviceHeight) + ')' : '' }};
-                height: 100%;
-            }
         </style>
     </div>
+
+    <script type="template/buildfire" id="sliderTemplate">
+        <div class="item" data-index="#id">
+            <img src="#src" alt="#title">
+        </div>
+    </script>
     <script>
+        $(document).on("click", ".item", function () {
+            var index = $(this).data("index");
+            buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
+                if (err) {
+                    console.warn('Error openning slider action: ', err);
+                }
+            });
+        });
 
         var textPluginApp = angular.module('textPlugin', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+
             /*
             * Get the required details about the device
             * */
-            $scope.deviceHeight = window.innerHeight;
-            // 9/16 is best ration to the slider height
-            $scope.sliderHeight = Math.floor($scope.deviceHeight * 0.5625);
+            var deviceHeight = window.innerHeight;
+            var deviceWidth = window.innerWidth;
+            var sliderHeight = Math.ceil(9 * deviceWidth / 16);
+            $scope.deviceHeight = deviceHeight;
+            $scope.sliderHeight = sliderHeight;
+
+            /*
+            * Get the slider selector and prepare it's options object
+            * */
+            var slider = $("#owlSlider");
+            var template = $("#sliderTemplate").html();
+            var sliderOptions = {
+                navigation: false,
+                dots: false,
+                slideSpeed: 450,
+                paginationSpeed: 400,
+                singleItem: true,
+                pagination: false,
+                items: 1,
+                itemsMobile: true,
+                autoHeight: false
+            };
+
+            /*
+            * Check if we need to destroy and re-create the slider again
+            * */
+            var updateSlider = false;
 
             $scope.data = {
                 content: {
@@ -55,11 +85,6 @@
                     backgroundImage: null
                 }
             };
-
-            /*
-            * Check if we need to destroy and re-create the slider again
-            * */
-            var updateSlider = false;
 
             $scope.optionAction = function (index) {
                 buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
@@ -73,7 +98,7 @@
             * bind data to the scope
             * */
             function bind(data) {
-                var slider = $("#owl-demo");
+                
                 $scope.data = data;
 
                 if (data && data.content && data.content.text) {
@@ -84,37 +109,34 @@
                     $scope.$apply();
                 }
 
-                //$scope.$digest();
-
                 var sliderData = slider.data('owlCarousel');
 
                 if (slider.length && sliderData) {
                     if (sliderData) {
                         sliderData.destroy();
+                        slider.empty();
                     }
                 }
 
-                if (slider.length) {
-                    var sliderOptions = {
-                        navigation: false,
-                        dots: false,
-                        slideSpeed: 300,
-                        paginationSpeed: 400,
-                        singleItem: true,
-                        pagination: false,
-                        items: 1,
-                        itemsMobile: true,
-                        autoHeight: false
-                    };
-
-                    if (data.content.carouselImages.length > 1) {
-                        sliderOptions.autoplay = 3000;
-                        sliderOptions.autoplaySpeed = 500;
-                        sliderOptions.loop = true;
-                    }
-
-                    $("#owl-demo").owlCarousel(sliderOptions);
+                if (data.content.carouselImages.length > 1) {
+                    sliderOptions.autoplay = 3000;
+                    sliderOptions.autoplaySpeed = 500;
+                    sliderOptions.loop = true;
                 }
+
+                var currentSlide = null;
+                var sliderImages = "";
+                for (var i = 0; i < $scope.data.content.carouselImages.length; i++) {
+                    currentSlide = $scope.data.content.carouselImages[i];
+                    sliderImages += template
+                        .replace("#src", buildfire.imageLib.resizeImage(currentSlide.iconUrl, { height: sliderHeight }))
+                        .replace("#title", currentSlide.title)
+                        .replace("#id", i);
+                    
+                }
+
+                slider.html(sliderImages);
+                slider.owlCarousel(sliderOptions);
             }
 
             /*
