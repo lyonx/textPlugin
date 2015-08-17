@@ -1,42 +1,125 @@
 <!DOCTYPE html>
 <html ng-app="textPluginDesign">
 <head lang="en">
-	<!-- CSS -->
+    <meta charset="UTF-8">
+
+    <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
     <link href="../../../../styles/siteIcons.css" rel="stylesheet">
-    
-	<!-- JS -->
+
+    <!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
 
-    <meta charset="UTF-8">
 </head>
 <body ng-controller="textPluginCtrl">
+    <div ng-form="frmMain">
+        <div class="item clearfix row">
+            <div class="labels col-md-3 padding-right-zero pull-left">
+                <span>Background Image</span>
+            </div>
+            <div class="main col-md-9 pull-right">
+                <div class="screens clearfix">
+                    <div class="screen text-center layouticon pull-left">
+                        <a class="border-grey border-radius-three default-background-hover" ng-click="changeBackground()">
+                            <span class="add-icon">+</span>
+                            <img src="{{ resizeImage(data.design.backgroundImage) }}" alt="Background Image" ng-show="data.design.backgroundImage" />
+                        </a>
+                        <label class="secondary">750x1334</label>
+                        <span class="icon btn-icon btn-delete-icon btn-danger transition-third" ng-click="deleteBackground()"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var textPluginApp = angular.module('textPluginDesign', []);
 
-	<div class="item clearfix row">
-		<div class="labels col-md-3 padding-right-zero pull-left">
-			<span>Background Image</span>
-		</div>
-		<div class="main col-md-9 pull-right">
-			<div class="screens clearfix">
-				<div class="screen text-center layouticon pull-left">
-					<a class="border-grey border-radius-three default-background-hover">
-						<span class="add-icon">+</span>
-					</a>
-					<label class="secondary">750x1334</label>
-					<span class="icon btn-icon btn-delete-icon btn-danger transition-third"><span>
-				</div>
-			</div>
-		</div>
-	</div>
+        textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
 
-<script>
-    var textPluginApp = angular.module('textPluginDesign',[]);
+            /*
+            * Go pull any previously saved data
+            * */
+            buildfire.datastore.get(function (err, result) {
+                if (result) {
+                    $scope.data = result.data;
+                    $scope.id = result.id;
+                    $scope.$digest();
+                    if (tmrDelay) clearTimeout(tmrDelay);
+                }
+                /*
+                 * watch for changes in data and trigger the saveDataWithDelay function on change
+                 * */
+                $scope.$watch('data', saveDataWithDelay, true);
+            });
 
-    textPluginApp.controller('textPluginCtrl',['$scope',function($scope){
-        
-		
-    }]);
-</script>
+            /*
+             * Call the datastore to save the data object
+             * */
+            var saveData = function (newObj) {
+                if (newObj == undefined) return;
+                if ($scope.frmMain.$invalid) {
+                    console.warn('invalid data, details will not be saved');
+                    return;
+                }
+
+                buildfire.datastore.save(newObj, function (err, result) {
+                    if (err || !result) {
+                        console.error('Error saving the widget details: ', err);
+                    }
+                    else {
+                        console.info('Widget details saved');
+                    }
+                });
+            };
+
+            /*
+             * create an artificial delay so api isnt called on every character entered
+             * */
+            var tmrDelay = null;
+            var saveDataWithDelay = function (newObj, oldObj) {
+                if (tmrDelay) clearTimeout(tmrDelay);
+                tmrDelay = setTimeout(function () {
+                    saveData(newObj);
+                }, 500);
+            };
+
+            /*
+            * Open a dailog to change the background image
+            * */
+            $scope.changeBackground = function () {
+                buildfire.imageLib.showDialog({ showIcons: false, multiSelection: false }, function (error, result) {
+                    if (result && result.selectedFiles && result.selectedFiles.length > 0) {
+                        if (!$scope.data.design) {
+                            $scope.data.design = {};
+                        }
+                        $scope.data.design.backgroundImage = result.selectedFiles[0];
+                        if (!$scope.$$phase && !$scope.$root.$$phase) {
+                            $scope.$apply();
+                        }
+                    }
+                });
+            };
+
+            /*
+            * Get background image thumbnail
+            * */
+            $scope.resizeImage = function (url) {
+                if (!url) {
+                    return "";
+                }
+                else {
+                    return buildfire.imageLib.resizeImage(url, { width: 88 });
+                }
+            };
+
+            /*
+            * Delete the background and back to the default white background
+            * */
+            $scope.deleteBackground = function () {
+                $scope.data.design.backgroundImage = "";
+            };
+        }]);
+    </script>
 </body>
 </html>

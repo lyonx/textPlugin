@@ -1,53 +1,177 @@
-<!DOCTYPE html>
-<html lang="en" ng-app="buildfire" >
-<head>
+﻿<!DOCTYPE html>
+<html ng-app="textPlugin">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Text widget</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="../../../../styles/bootstrap.css">
-    <link rel="stylesheet" href="../../../../styles/siteIcons.css">
-    <link rel="stylesheet" href="../../../../styles/appStyle.css">
-    <link rel="stylesheet" href="../../../../styles/helper.css">
-    
-   	<!-- jQuery & Owl Carousel -->
-	<script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>    
-	<script src="../../../scripts/owlCarousel/owlCarousel.js"></script>
-    <link rel="stylesheet" href="../../../../scripts/owlCarousel/owlCarousel.css">
+    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
 
-    <!-- Meta -->
-	<meta charset="utf-8">
+    <script src="../../../scripts/angular/angular.min.js"></script>
+    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
+    <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
 </head>
-<script type="text/javascript" charset="utf-8">
-	$(function(){
-		var slides = $('.plugin-slider .plugin-slide').length;
-		
-		// Slider needs at least 2 slides or you'll get an error.
-		if(slides > 1){
-			$('.plugin-slider').owlCarousel({
-				loop:true,
-				nav:false,
-				items:1
-			});	
-		}
-	})
-</script>
-<div class="holder padding-zero">
-	<div class="text-plugin layout1">
-		<div class="text-banner clearfix border-bottom-grey">
-			<div class="plugin-slider text-center">
-				<div class="plugin-slide">
-					<img src="http://www.placehold.it/1280x720.jpg">
-				</div>
-				<div class="plugin-slide">
-					<img src="http://www.placehold.it/1280x720.jpg">
-				</div>
-				<div class="plugin-slide">
-					<img src="http://www.placehold.it/1280x720.jpg">
-				</div>
-			</div>
-		</div>				
-		<div class="padded">
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-		</div>
-	</div>
-</div>
+<body>
+    <div id="wrapper" ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + resizeImage(data.design.backgroundImage, deviceHeight) + ')' : '' }}; height: 100%;">
+        <div id="owlSlider"></div>
+        <div ng-bind-html="data.content.text" class="widget-content"></div>
+        <style>
+            .widget-content {
+                padding: 10px;
+            }
+
+            .owl-carousel .owl-item img {
+                height: {{ sliderHeight }}px;
+                width: 100%;
+            }
+        </style>
+    </div>
+
+    <script type="template/buildfire" id="sliderTemplate">
+        <div class="item" data-index="#id">
+            <img src="#src" alt="#title">
+        </div>
+    </script>
+    <script>
+        $(document).on("click", ".item", function () {
+            var index = $(this).data("index");
+            buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
+                if (err) {
+                    console.warn('Error openning slider action: ', err);
+                }
+            });
+        });
+
+        var textPluginApp = angular.module('textPlugin', []);
+
+        textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+
+            /*
+            * Get the required details about the device
+            * */
+            var deviceHeight = window.innerHeight;
+            var deviceWidth = window.innerWidth;
+            var sliderHeight = Math.ceil(9 * deviceWidth / 16);
+            $scope.deviceHeight = deviceHeight;
+            $scope.sliderHeight = sliderHeight;
+
+            /*
+            * Get the slider selector and prepare it's options object
+            * */
+            var slider = $("#owlSlider");
+            var template = $("#sliderTemplate").html();
+            var sliderOptions = {
+                navigation: false,
+                dots: false,
+                slideSpeed: 450,
+                paginationSpeed: 400,
+                singleItem: true,
+                pagination: false,
+                items: 1,
+                itemsMobile: true,
+                autoHeight: false
+            };
+
+            /*
+            * Check if we need to destroy and re-create the slider again
+            * */
+            var updateSlider = false;
+
+            $scope.data = {
+                content: {
+                    carouselImages: []
+                },
+                design: {
+                    backgroundImage: null
+                }
+            };
+
+            $scope.optionAction = function (index) {
+                buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
+                    if (err) {
+                        console.warn('Error openning slider action: ', err);
+                    }
+                });
+            };
+
+            /*
+            * bind data to the scope
+            * */
+            function bind(data) {
+                
+                $scope.data = data;
+
+                if (data && data.content && data.content.text) {
+                    $scope.data.content.text = $sce.trustAsHtml(data.content.text);
+                }
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
+
+                var sliderData = slider.data('owlCarousel');
+
+                if (slider.length && sliderData) {
+                    if (sliderData) {
+                        sliderData.destroy();
+                        slider.empty();
+                    }
+                }
+
+                if (data.content.carouselImages.length > 1) {
+                    sliderOptions.autoplay = 3000;
+                    sliderOptions.autoplaySpeed = 500;
+                    sliderOptions.loop = true;
+                }
+
+                var currentSlide = null;
+                var sliderImages = "";
+                for (var i = 0; i < $scope.data.content.carouselImages.length; i++) {
+                    currentSlide = $scope.data.content.carouselImages[i];
+                    sliderImages += template
+                        .replace("#src", buildfire.imageLib.resizeImage(currentSlide.iconUrl, { height: sliderHeight }))
+                        .replace("#title", currentSlide.title)
+                        .replace("#id", i);
+                    
+                }
+
+                slider.html(sliderImages);
+                slider.owlCarousel(sliderOptions);
+            }
+
+            /*
+             * Go pull saved data
+             * */
+            function loadData() {
+                buildfire.datastore.get(function (err, result) {
+                    if (result) bind(result.data);
+                });
+            }
+
+            loadData();
+
+            /**
+             * when a refresh is triggered get reload data
+             */
+            buildfire.datastore.onRefresh(loadData);
+
+            buildfire.datastore.onUpdate(function (e) {
+                updateSlider = true;
+                loadData();
+            });
+
+            /*
+            * A helper to resie the background and slider images
+            * */
+            $scope.resizeImage = function (url, height) {
+                if (!url) {
+                    return "";
+                }
+                else {
+                    return buildfire.imageLib.resizeImage(url, { height: height });
+                }
+            };
+        }]);
+    </script>
+</body>
 </html>
