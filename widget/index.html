@@ -11,18 +11,19 @@
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
 </head>
-<body>
-    <div id="wrapper" ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + resizeImage(data.design.backgroundImage, deviceHeight) + ')' : '' }}; height: 100%;">
+<body ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) + ')' : '' }}; background-attachment: fixed;">
+    <div id="wrapper">
         <div id="owlSlider"></div>
-        <div ng-bind-html="data.content.text" class="widget-content"></div>
+        <div ng-bind-html="data.content.text" class="widget-content" style="padding: {{ data.content.carouselImages.length ? (sliderHeight + 10) : 10 }}px 10px 0 10px"></div>
         <style>
-            .widget-content {
-                padding: 10px;
+            #owlSlider {
+                position: fixed;
+                top: 0;
+                left: 0;
             }
 
-            .owl-carousel .owl-item img {
-                height: {{ sliderHeight }}px;
-                width: 100%;
+            .owl-item {
+                -webkit-transform: translateZ(0);
             }
         </style>
     </div>
@@ -33,18 +34,18 @@
         </div>
     </script>
     <script>
-        $(document).on("click", ".item", function () {
-            var index = $(this).data("index");
-            buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
-                if (err) {
-                    console.warn('Error openning slider action: ', err);
-                }
-            });
-        });
-
         var textPluginApp = angular.module('textPlugin', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+
+            $(document).on("click", ".item", function () {
+                var index = $(this).data("index");
+                buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
+                    if (err) {
+                        console.warn('Error openning slider action: ', err);
+                    }
+                });
+            });
 
             /*
             * Get the required details about the device
@@ -53,6 +54,7 @@
             var deviceWidth = window.innerWidth;
             var sliderHeight = Math.ceil(9 * deviceWidth / 16);
             $scope.deviceHeight = deviceHeight;
+            $scope.deviceWidth = deviceWidth;
             $scope.sliderHeight = sliderHeight;
 
             /*
@@ -69,7 +71,8 @@
                 pagination: false,
                 items: 1,
                 itemsMobile: true,
-                autoHeight: false
+                autoHeight: false,
+                itemsMobile: true
             };
 
             /*
@@ -98,7 +101,7 @@
             * bind data to the scope
             * */
             function bind(data) {
-                
+
                 $scope.data = data;
 
                 if (data && data.content && data.content.text) {
@@ -113,6 +116,7 @@
 
                 if (slider.length && sliderData) {
                     if (sliderData) {
+                        slider.trigger('autoplay.stop.owl')
                         sliderData.destroy();
                         slider.empty();
                     }
@@ -125,14 +129,16 @@
                 }
 
                 var currentSlide = null;
+                var imageslength = $scope.data.content.carouselImages.length;
                 var sliderImages = "";
-                for (var i = 0; i < $scope.data.content.carouselImages.length; i++) {
+
+                for (var i = 0; i < imageslength; i++) {
                     currentSlide = $scope.data.content.carouselImages[i];
                     sliderImages += template
-                        .replace("#src", buildfire.imageLib.resizeImage(currentSlide.iconUrl, { height: sliderHeight }))
+                        .replace("#src", $scope.cropImage(currentSlide.iconUrl, { width: deviceWidth, height: sliderHeight }))
                         .replace("#title", currentSlide.title)
                         .replace("#id", i);
-                    
+
                 }
 
                 slider.html(sliderImages);
@@ -163,15 +169,24 @@
             /*
             * A helper to resie the background and slider images
             * */
-            $scope.resizeImage = function (url, height) {
+            $scope.cropImage = function (url, settings) {
+                var options = {};
                 if (!url) {
                     return "";
                 }
                 else {
-                    return buildfire.imageLib.resizeImage(url, { height: height });
+                    if (settings.height) {
+                        options.height = settings.height;
+                    }
+
+                    if (settings.width) {
+                        options.width = settings.width;
+                    }
+                    return buildfire.imageLib.cropImage(url, options);
                 }
             };
         }]);
     </script>
 </body>
+
 </html>
