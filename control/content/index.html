@@ -63,7 +63,7 @@
                         <div as-sortable-item-handle class="as-sortable-item-handle" style="height:36px;">
                             <span class="icon icon-menu pull-left"></span>
                             <div class="media-holder pull-left">
-                                <img src="{{ resizeImage(item.iconUrl) }}" class="border-radius-four border-grey">
+                                <img ng-src="{{ resizeImage(item.iconUrl) }}" class="border-radius-four border-grey">
                             </div>
                             <div class="copy pull-right">
                                 <span class="title ellipsis">
@@ -96,7 +96,6 @@
         var textPluginApp = angular.module('textPlugin', ['ui.bootstrap', 'ui.tinymce', , 'ui.sortable']);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-
             $scope.items = [];
 
             $scope.sortableOptions = {
