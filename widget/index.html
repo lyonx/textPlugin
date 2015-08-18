@@ -12,9 +12,9 @@
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
 </head>
 <body ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) + ')' : '' }}; background-attachment: fixed;">
-    <div id="wrapper">
+    <div id="wrapper" class="container">
         <div id="owlSlider"></div>
-        <div ng-bind-html="data.content.text" class="widget-content" style="padding: {{ data.content.carouselImages.length ? (sliderHeight + 10) : 10 }}px 10px 0 10px"></div>
+        <div ng-bind-html="data.content.text" class="widget-content" style="padding-top: {{ data.content.carouselImages.length ? (sliderHeight + 10) : 10 }}px"></div>
         <style>
             #owlSlider {
                 position: fixed;
@@ -56,24 +56,11 @@
             $scope.deviceHeight = deviceHeight;
             $scope.deviceWidth = deviceWidth;
             $scope.sliderHeight = sliderHeight;
-
             /*
             * Get the slider selector and prepare it's options object
             * */
             var slider = $("#owlSlider");
             var template = $("#sliderTemplate").html();
-            var sliderOptions = {
-                navigation: false,
-                dots: false,
-                slideSpeed: 450,
-                paginationSpeed: 400,
-                singleItem: true,
-                pagination: false,
-                items: 1,
-                itemsMobile: true,
-                autoHeight: false,
-                itemsMobile: true
-            };
 
             /*
             * Check if we need to destroy and re-create the slider again
@@ -97,6 +84,44 @@
                 });
             };
 
+            function initlizeSlider() {
+
+                var sliderOptions = {
+                    navigation: false,
+                    dots: false,
+                    singleItem: true,
+                    pagination: false,
+                    items: 1,
+                    itemsMobile: true,
+                    autoHeight: false,
+                    itemsMobile: true
+                };
+
+                if ($scope.data.content.carouselImages.length > 1) {
+                    sliderOptions.autoplay = 3000;
+                    sliderOptions.autoplaySpeed = 500;
+                    sliderOptions.loop = true;
+                    sliderOptions.slideSpeed = 450;
+                    sliderOptions.paginationSpeed = 400;
+                }
+
+                var currentSlide = null;
+                var imageslength = $scope.data.content.carouselImages.length;
+                var sliderImages = "";
+
+                for (var i = 0; i < imageslength; i++) {
+                    currentSlide = $scope.data.content.carouselImages[i];
+                    sliderImages += template
+                        .replace("#src", $scope.cropImage(currentSlide.iconUrl, { width: deviceWidth, height: sliderHeight }))
+                        .replace("#title", currentSlide.title)
+                        .replace("#id", i);
+
+                }
+
+                slider.html(sliderImages);
+                slider.owlCarousel(sliderOptions);
+            }
+
             /*
             * bind data to the scope
             * */
@@ -116,33 +141,12 @@
 
                 if (slider.length && sliderData) {
                     if (sliderData) {
-                        slider.trigger('autoplay.stop.owl')
+                        slider.trigger('autoplay.stop.owl');
+                        slider.trigger('autoplay.loop.owl', false);
                         sliderData.destroy();
-                        slider.empty();
                     }
                 }
-
-                if (data.content.carouselImages.length > 1) {
-                    sliderOptions.autoplay = 3000;
-                    sliderOptions.autoplaySpeed = 500;
-                    sliderOptions.loop = true;
-                }
-
-                var currentSlide = null;
-                var imageslength = $scope.data.content.carouselImages.length;
-                var sliderImages = "";
-
-                for (var i = 0; i < imageslength; i++) {
-                    currentSlide = $scope.data.content.carouselImages[i];
-                    sliderImages += template
-                        .replace("#src", $scope.cropImage(currentSlide.iconUrl, { width: deviceWidth, height: sliderHeight }))
-                        .replace("#title", currentSlide.title)
-                        .replace("#id", i);
-
-                }
-
-                slider.html(sliderImages);
-                slider.owlCarousel(sliderOptions);
+                initlizeSlider();
             }
 
             /*

@@ -99,8 +99,7 @@
             $scope.items = [];
 
             $scope.sortableOptions = {
-                orderChanged: function (e, ui) {
-                    console.info('Order change event details: ', e, ui);
+                orderChanged: function (e) {
                 }
             };
 
@@ -171,7 +170,6 @@
                     if (err)
                         console.error('Error saving slider: ', err);
                     else {
-                        console.info(actionItem);
                         if (actionItem) {
                             if (!$scope.data.content.carouselImages) {
                                 $scope.data.content.carouselImages = [];
