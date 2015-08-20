@@ -6,77 +6,25 @@
     <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
     <link href="../../../../styles/siteIcons.css" rel="stylesheet">
-    <link href="./css/ng-sortable.min.css" rel="stylesheet">
-    <link href="./css/ng-sortable.style.min.css" rel="stylesheet">
 
     <!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
-    <script src="../../../../scripts/angular/ui-bootstrap.min.js"></script>
+    <!--<script src="../../../../scripts/angular/ui-bootstrap.min.js"></script> -->
     <script src="../../../../scripts/tinymce/tinymce.min.js"></script>
     <script src="../../../../scripts/tinymce/ui-tinymce.js"></script>
+
+    <script src="../../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script src="./js/ng-sortable.js"></script>
+    <script src="../../../../scripts/sortable.min.js"></script>
+    <script src="../../../../scripts/buildfire/components/carousel/carousel.js"></script>
 
-    <style>
-        #textApp .as-sortable-item.d-item {
-            border: 0;
-            border-top: 1px solid #ddd;
-            border-radius: 0;
-            padding: 10px 20px;
-        }
 
-            #textApp .as-sortable-item.d-item:first-child {
-                border-top: 0;
-            }
-
-        #textApp .as-sortable-placeholder {
-            border-radius: 0;
-        }
-
-        #textApp .draggable-list-view .d-item img {
-            max-width: 98%;
-            max-height: 98%;
-        }
-    </style>
 </head>
 <body ng-controller="textPluginCtrl" id="textApp">
     <div ng-form="frmMain">
 
-        <div class="item clearfix row margin-bottom-fifteen">
-            <div class="labels col-md-3 padding-right-zero pull-left">
-                <span>Image Carousel</span>
-            </div>
-            <div class="col-md-9 pull-left">
-                <button type="button" class="btn btn-primary" ng-click="addCarouselImage()">
-                    <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
-                    Add Image
-                </button>
-            </div>
-        </div>
-
-        <hr class="none">
-
-        <div class="item clearfix row margin-bottom-fifteen" ng-show="data.content.carouselImages.length > 0">
-            <div class="main col-md-9 pull-right">
-                <div as-sortable="sortableOptions" ng-model="items" class="carousel-items draggable-list-view margin-top-twenty border-radius-four border-grey">
-                    <div ng-repeat="item in items" as-sortable-item class="as-sortable-item d-item">
-                        <div as-sortable-item-handle class="as-sortable-item-handle" style="height:36px;">
-                            <span class="icon icon-menu pull-left"></span>
-                            <div class="media-holder pull-left">
-                                <img ng-src="{{ resizeImage(item.iconUrl) }}" class="border-radius-four border-grey">
-                            </div>
-                            <div class="copy pull-right">
-                                <span class="title ellipsis">
-                                    {{ item.title }}
-                                </span>
-                                <a class="text-primary text" ng-click="editSlider($index)">edit</a>
-                                <span class="btn-icon btn-delete-icon btn-danger transition-third" ng-click="deleteSlider($index)"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="carousel"></div>
 
         <div class="item clearfix row">
             <div class="labels col-md-3 padding-right-zero pull-left">
@@ -93,15 +41,12 @@
     </div>
 
     <script>
-        var textPluginApp = angular.module('textPlugin', ['ui.bootstrap', 'ui.tinymce', , 'ui.sortable']);
+        var textPluginApp = angular.module('textPlugin', [ 'ui.tinymce' ]);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-            $scope.items = [];
+            /// create a new instance of the buildfire carousel editor
+            var editor = new buildfire.components.carousel.editor("#carousel");
 
-            $scope.sortableOptions = {
-                orderChanged: function (e) {
-                }
-            };
 
             /*
              * Go pull any previously saved data
@@ -110,7 +55,9 @@
                 if (result) {
                     $scope.data = result.data;
                     $scope.id = result.id;
-                    $scope.items = $scope.data.content.carouselImages;
+                    if($scope.data.content && $scope.data.content.carouselImages)
+                        editor.loadItems($scope.data.content.carouselImages);
+
                     if (!$scope.$$phase && !$scope.$root.$$phase) {
                         $scope.$apply();
                     }
@@ -122,7 +69,7 @@
                         }
                     };
 
-                    $scope.items = $scope.data.content.carouselImages;
+                    editor.loadItems($scope.data.content.carouselImages);
                 }
                 /*
                  * watch for changes in data and trigger the saveDataWithDelay function on change
@@ -161,70 +108,11 @@
                 }, 500);
             };
 
-            /*
-            * Open a dialog to add a new image to the slider
-            * */
-            $scope.addCarouselImage = function () {
-                var options = { showIcon: true };
-                buildfire.actionItems.showDialog(null, options, function (err, actionItem) {
-                    if (err)
-                        console.error('Error saving slider: ', err);
-                    else {
-                        if (actionItem) {
-                            if (!$scope.data.content.carouselImages) {
-                                $scope.data.content.carouselImages = [];
-                            }
-                            actionItem.order = $scope.data.content.carouselImages.length + 1;
-                            $scope.data.content.carouselImages.push(actionItem);
-
-                            if (!$scope.$$phase && !$scope.$root.$$phase) {
-                                $scope.$apply();
-                            }
-                        }
-                    }
-                });
+            // this method will be called when a new item added to the list
+            editor.onAddItems = editor.onDeleteItem = editor.onItemChange = editor.onOrderChange = function () {
+                $scope.data.content.carouselImages = editor.items;
+                saveData($scope.data);
             };
-
-            /*
-            * Resize display image to thumbnail size
-            * */
-            $scope.resizeImage = function (url) {
-                if (!url) {
-                    return "";
-                }
-                else {
-                    return buildfire.imageLib.resizeImage(url, { width: 65 });
-                }
-            };
-
-            /*
-            * Delete an image from the slider
-            * */
-            $scope.deleteSlider = function (index) {
-                $scope.data.content.carouselImages.splice(index, 1);
-                if (!$scope.$$phase && !$scope.$root.$$phase) {
-                    $scope.$apply();
-                }
-            }
-
-            /*
-            * Option actionItem to edit the details of a slider
-            * */
-            $scope.editSlider = function (index) {
-                var options = { showIcon: true };
-                buildfire.actionItems.showDialog($scope.data.content.carouselImages[index], options, function (err, actionItem) {
-                    if (err)
-                        console.error('Error load actionItem: ', err);
-                    else {
-                        if (actionItem) {
-                            $scope.data.content.carouselImages[index] = actionItem;
-                            if (!$scope.$$phase && !$scope.$root.$$phase) {
-                                $scope.$apply();
-                            }
-                        }
-                    }
-                });
-            }
 
         }]);
     </script>

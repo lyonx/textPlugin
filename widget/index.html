@@ -10,62 +10,23 @@
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
+    <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
 </head>
 <body ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) + ')' : '' }}; background-attachment: fixed;">
-    <div id="wrapper" class="container">
-        <div id="owlSlider"></div>
-        <div ng-bind-html="data.content.text" class="widget-content" style="padding-top: {{ data.content.carouselImages.length ? (sliderHeight + 10) : 10 }}px"></div>
-        <style>
-            #owlSlider {
-                position: fixed;
-                top: 0;
-                left: 0;
-            }
-
-            .owl-item {
-                -webkit-transform: translateZ(0);
-            }
-        </style>
-    </div>
-
-    <script type="template/buildfire" id="sliderTemplate">
-        <div class="item" data-index="#id">
-            <img src="#src" alt="#title">
-        </div>
-    </script>
+    <div id="carousel"></div>
+    <div ng-bind-html="data.content.text" class="widget-content" style="padding-top: 10px"></div>
     <script>
         var textPluginApp = angular.module('textPlugin', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+            var view = new buildfire.components.carousel.view("#carousel", []);
 
-            $(document).on("click", ".item", function () {
-                var index = $(this).data("index");
-                buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
-                    if (err) {
-                        console.warn('Error openning slider action: ', err);
-                    }
-                });
-            });
-
-            /*
-            * Get the required details about the device
-            * */
             var deviceHeight = window.innerHeight;
             var deviceWidth = window.innerWidth;
             var sliderHeight = Math.ceil(9 * deviceWidth / 16);
             $scope.deviceHeight = deviceHeight;
             $scope.deviceWidth = deviceWidth;
             $scope.sliderHeight = sliderHeight;
-            /*
-            * Get the slider selector and prepare it's options object
-            * */
-            var slider = $("#owlSlider");
-            var template = $("#sliderTemplate").html();
-
-            /*
-            * Check if we need to destroy and re-create the slider again
-            * */
-            var updateSlider = false;
 
             $scope.data = {
                 content: {
@@ -76,51 +37,7 @@
                 }
             };
 
-            $scope.optionAction = function (index) {
-                buildfire.actionItems.execute($scope.data.content.carouselImages[index], function (err, result) {
-                    if (err) {
-                        console.warn('Error openning slider action: ', err);
-                    }
-                });
-            };
 
-            function initlizeSlider() {
-
-                var sliderOptions = {
-                    navigation: false,
-                    dots: false,
-                    singleItem: true,
-                    pagination: false,
-                    items: 1,
-                    itemsMobile: true,
-                    autoHeight: false,
-                    itemsMobile: true
-                };
-
-                if ($scope.data.content.carouselImages.length > 1) {
-                    sliderOptions.autoplay = 3000;
-                    sliderOptions.autoplaySpeed = 500;
-                    sliderOptions.loop = true;
-                    sliderOptions.slideSpeed = 450;
-                    sliderOptions.paginationSpeed = 400;
-                }
-
-                var currentSlide = null;
-                var imageslength = $scope.data.content.carouselImages.length;
-                var sliderImages = "";
-
-                for (var i = 0; i < imageslength; i++) {
-                    currentSlide = $scope.data.content.carouselImages[i];
-                    sliderImages += template
-                        .replace("#src", $scope.cropImage(currentSlide.iconUrl, { width: deviceWidth, height: sliderHeight }))
-                        .replace("#title", currentSlide.title)
-                        .replace("#id", i);
-
-                }
-
-                slider.html(sliderImages);
-                slider.owlCarousel(sliderOptions);
-            }
 
             /*
             * bind data to the scope
@@ -137,16 +54,9 @@
                     $scope.$apply();
                 }
 
-                var sliderData = slider.data('owlCarousel');
+                if($scope.data.content && $scope.data.content.carouselImages)
+                    view.loadItems($scope.data.content.carouselImages);
 
-                if (slider.length && sliderData) {
-                    if (sliderData) {
-                        slider.trigger('autoplay.stop.owl');
-                        slider.trigger('autoplay.loop.owl', false);
-                        sliderData.destroy();
-                    }
-                }
-                initlizeSlider();
             }
 
             /*
@@ -166,13 +76,9 @@
             buildfire.datastore.onRefresh(loadData);
 
             buildfire.datastore.onUpdate(function (e) {
-                updateSlider = true;
                 loadData();
             });
 
-            /*
-            * A helper to resie the background and slider images
-            * */
             $scope.cropImage = function (url, settings) {
                 var options = {};
                 if (!url) {
@@ -182,13 +88,13 @@
                     if (settings.height) {
                         options.height = settings.height;
                     }
-
                     if (settings.width) {
                         options.width = settings.width;
                     }
                     return buildfire.imageLib.cropImage(url, options);
                 }
             };
+
         }]);
     </script>
 </body>
