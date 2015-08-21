@@ -4,99 +4,119 @@
     <meta charset="UTF-8">
     <title>Text widget</title>
 
-    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
+    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet"/>
 
     <script src="../../../scripts/angular/angular.min.js"></script>
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
     <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
+
 </head>
-<body ng-controller="textPluginCtrl" ng-cloak style="{{ data.design.backgroundImage ? 'background-image: url(' + cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) + ')' : '' }}; background-attachment: fixed;">
+<body ng-controller="textPluginCtrl" ng-cloak>
+
+<style>
+
+    .overlay{
+        position: absolute;
+        top:0;
+        left:0;
+    }
+</style>
+
+<div class="overlay" ng-show="data.design.backgroundImage">
+    <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}"
+        style="-webkit-filter: blur({{data.design.backgroundBlur}}px);
+        -moz-filter: blur({{data.design.backgroundBlur}}px);
+        -o-filter: blur({{data.design.backgroundBlur}}px);
+        -ms-filter: blur({{data.design.backgroundBlur}}px);
+        filter: blur({{data.design.backgroundBlur}}px);">
+</div>
+<div class="overlay">
     <div id="carousel"></div>
     <div ng-bind-html="data.content.text" class="widget-content" style="padding-top: 10px"></div>
-    <script>
-        var textPluginApp = angular.module('textPlugin', []);
+</div>
+<script>
+    var textPluginApp = angular.module('textPlugin', []);
 
-        textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
-            var view = new buildfire.components.carousel.view("#carousel", []);
+    textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+        var view = new buildfire.components.carousel.view("#carousel", []);
 
-            var deviceHeight = window.innerHeight;
-            var deviceWidth = window.innerWidth;
-            var sliderHeight = Math.ceil(9 * deviceWidth / 16);
-            $scope.deviceHeight = deviceHeight;
-            $scope.deviceWidth = deviceWidth;
-            $scope.sliderHeight = sliderHeight;
+        var deviceHeight = window.innerHeight;
+        var deviceWidth = window.innerWidth;
+        var sliderHeight = Math.ceil(9 * deviceWidth / 16);
+        $scope.deviceHeight = deviceHeight;
+        $scope.deviceWidth = deviceWidth;
+        $scope.sliderHeight = sliderHeight;
 
-            $scope.data = {
-                content: {
-                    carouselImages: []
-                },
-                design: {
-                    backgroundImage: null
-                }
-            };
+        $scope.data = {
+            content: {
+                carouselImages: []
+            },
+            design: {
+                backgroundImage: null
+            }
+        };
 
 
+        /*
+         * bind data to the scope
+         * */
+        function bind(data) {
 
-            /*
-            * bind data to the scope
-            * */
-            function bind(data) {
+            $scope.data = data;
 
-                $scope.data = data;
-
-                if (data && data.content && data.content.text) {
-                    $scope.data.content.text = $sce.trustAsHtml(data.content.text);
-                }
-
-                if (!$scope.$$phase && !$scope.$root.$$phase) {
-                    $scope.$apply();
-                }
-
-                if($scope.data.content && $scope.data.content.carouselImages)
-                    view.loadItems($scope.data.content.carouselImages);
-
+            if (data && data.content && data.content.text) {
+                $scope.data.content.text = $sce.trustAsHtml(data.content.text);
             }
 
-            /*
-             * Go pull saved data
-             * */
-            function loadData() {
-                buildfire.datastore.get(function (err, result) {
-                    if (result) bind(result.data);
-                });
+            if (!$scope.$$phase && !$scope.$root.$$phase) {
+                $scope.$apply();
             }
 
-            loadData();
+            if ($scope.data.content && $scope.data.content.carouselImages)
+                view.loadItems($scope.data.content.carouselImages);
 
-            /**
-             * when a refresh is triggered get reload data
-             */
-            buildfire.datastore.onRefresh(loadData);
+        }
 
-            buildfire.datastore.onUpdate(function (e) {
-                loadData();
+        /*
+         * Go pull saved data
+         * */
+        function loadData() {
+            buildfire.datastore.get(function (err, result) {
+                if (result) bind(result.data);
             });
+        }
 
-            $scope.cropImage = function (url, settings) {
-                var options = {};
-                if (!url) {
-                    return "";
-                }
-                else {
-                    if (settings.height) {
-                        options.height = settings.height;
-                    }
-                    if (settings.width) {
-                        options.width = settings.width;
-                    }
-                    return buildfire.imageLib.cropImage(url, options);
-                }
-            };
+        loadData();
 
-        }]);
-    </script>
+        /**
+         * when a refresh is triggered get reload data
+         */
+        buildfire.datastore.onRefresh(loadData);
+
+        buildfire.datastore.onUpdate(function (e) {
+            loadData();
+        });
+
+        $scope.cropImage = function (url, settings) {
+            var options = {};
+            if (!url) {
+                return "";
+            }
+            else {
+                if (settings.height) {
+                    options.height = settings.height;
+                }
+                if (settings.width) {
+                    options.width = settings.width;
+                }
+                return buildfire.imageLib.cropImage(url, options);
+            }
+        };
+
+    }]);
+</script>
 </body>
 
 </html>
