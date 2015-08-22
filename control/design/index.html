@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html ng-app="textPluginDesign">
 <head lang="en">
     <meta charset="UTF-8">
@@ -56,6 +56,15 @@
                     $scope.id = result.id;
                     $scope.$digest();
 
+                } else {
+                    $scope.data = {
+                        content: {
+                            carouselImages: []
+                        },
+                        design: {
+                            backgroundImage: null
+                        }
+                    };
                 }
                 /*
                  * watch for changes in data and trigger the saveData function on change
