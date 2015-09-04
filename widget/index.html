@@ -19,6 +19,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
         }
 
         .overlay.background {
@@ -35,7 +36,7 @@
     </div>
     <div class="overlay">
         <div id="carousel"></div>
-        <div ng-bind-html="data.content.text" class="widget-content" style="padding-top: 10px"></div>
+        <div ng-bind-html="data.content.text" class="widget-content padded"></div>
     </div>
     <script>
         var textPluginApp = angular.module('textPlugin', []);
