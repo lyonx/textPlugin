@@ -23,16 +23,21 @@
         }
 
         .overlay.background {
-            position: fixed;
-        }
+                position: fixed;
+                height: 100%;
+            }
+
+            .overlay.background img {
+                height: 100%;
+            }
     </style>
     <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
         <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}"
              style="-webkit-filter: blur({{data.design.backgroundBlur}}px);
-             -moz-filter blur({{data.design.backgroundblur}}px);
-             -o-filter blur({{data.design.backgroundblur}}px);
-             -ms-filter blur({{data.design.backgroundblur}}px);
-             filter blur({{data.design.backgroundblur}}px);">
+             -moz-filter blur({{data.design.backgroundBlur}}px);
+             -o-filter blur({{data.design.backgroundBlur}}px);
+             -ms-filter blur({{data.design.backgroundBlur}}px);
+             filter blur({{data.design.backgroundBlur}}px);">
     </div>
     <div class="overlay">
         <div id="carousel"></div>
@@ -44,13 +49,17 @@
         textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
             var view = null;
 
+            $scope.deviceHeight = window.innerHeight;
+            $scope.deviceWidth = window.innerWidth;
+
             $scope.data = {
                 content: {
-                    carouselImages: []
+                    carouselImages: [],
+                    text: ""
                 },
                 design: {
                     backgroundImage: null,
-                    backgroundblur: 0
+                    backgroundBlur: 0
                 }
             };
 
@@ -101,7 +110,7 @@
              * */
             function loadData() {
                 buildfire.datastore.get(function (err, result) {
-                    if (result) bind(result.data);
+                    if (result && result.data && !angular.equals({}, result.data)) bind(result.data);
                 });
             }
 

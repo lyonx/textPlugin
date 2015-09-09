@@ -51,24 +51,29 @@
              * Go pull any previously saved data
              * */
             buildfire.datastore.get(function (err, result) {
-                if (result) {
+                if (result && result.data && !angular.equals({}, result.data)) {
                     $scope.data = result.data;
                     $scope.id = result.id;
                     if($scope.data.content && $scope.data.content.carouselImages)
                         editor.loadItems($scope.data.content.carouselImages);
-
-                    if (!$scope.$$phase && !$scope.$root.$$phase) {
-                        $scope.$apply();
-                    }
                     if (tmrDelay) clearTimeout(tmrDelay);
                 } else {
                     $scope.data = {
                         content: {
-                            carouselImages: []
+                            carouselImages: [],
+                            text: ""
+                        },
+                        design: {
+                            backgroundImage: null,
+                            backgroundBlur: 0
                         }
                     };
-
                     editor.loadItems($scope.data.content.carouselImages);
+                }
+
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
                 }
                 /*
                  * watch for changes in data and trigger the saveDataWithDelay function on change
