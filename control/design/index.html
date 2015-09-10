@@ -14,15 +14,7 @@
 </head>
 <body ng-controller="textPluginCtrl">
     <div ng-form="frmMain">
-        <div class="item clearfix row">
-            <div class="labels col-md-3 padding-right-zero pull-left">
-                <span>Background Image</span>
-            </div>
-            <div class="main col-md-9 pull-right">
-                <div id="background"></div>
-            </div>
-        </div>
-
+        <div id="background"></div>
         <div class="item clearfix row">
             <div class="labels col-md-3 padding-right-zero pull-left" ng-show="data.design.backgroundImage">
                 <span>Blur Background</span>
@@ -38,7 +30,7 @@
         var textPluginApp = angular.module('textPluginDesign', []);
         
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-            var background = new buildfire.components.images.thumbnail("#background");
+            var background = new buildfire.components.images.thumbnail("#background", { title: "Background Image", dimensionsLabel: "750x1334" });
             /*
             * Go pull any previously saved data
             * */

@@ -30,6 +30,10 @@
             .overlay.background img {
                 height: 100%;
             }
+
+        .owl-carousel .owl-controls .owl-dots {
+            text-align: center;
+        }
     </style>
     <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
         <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}"
