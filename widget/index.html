@@ -63,14 +63,20 @@
                 },
                 design: {
                     backgroundImage: null,
-                    backgroundBlur: 0
+                    backgroundBlur: 0,
+                    selectedLayout: 1
                 }
             };
 
             function initDeviceSize(callback) {
                 $scope.deviceHeight = window.innerHeight;
                 $scope.deviceWidth = window.innerWidth;
-                $scope.sliderHeight = Math.ceil(9 * $scope.deviceWidth / 16);
+                if ($scope.data.design.selectedLayout == 1) {
+                    $scope.sliderHeight = Math.ceil(9 * $scope.deviceWidth / 16);
+                } else {
+                    $scope.sliderHeight = Math.ceil(1 * $scope.deviceWidth / 2.39);
+                }
+
                 if (callback) {
                     if ($scope.deviceWidth == 0 || $scope.deviceHeight == 0) {
                         setTimeout(function () {
@@ -97,9 +103,9 @@
                 if ($scope.data.content && $scope.data.content.carouselImages) {
                     initDeviceSize(function () {
                         if (!view) {
-                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages);
+                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages, $scope.data.design.selectedLayout);
                         } else {
-                            view.loadItems($scope.data.content.carouselImages);
+                            view.loadItems($scope.data.content.carouselImages, null, $scope.data.design.selectedLayout);
                         }
                     });
                 }

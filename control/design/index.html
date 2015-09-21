@@ -2,7 +2,7 @@
 <html ng-app="textPluginDesign">
 <head lang="en">
     <meta charset="UTF-8">
-
+    <title>design</title>
     <!-- CSS -->
     <link href="../../../../styles/helper.css" rel="stylesheet">
     <link href="../../../../styles/siteIcons.css" rel="stylesheet">
@@ -14,6 +14,22 @@
 </head>
 <body ng-controller="textPluginCtrl">
     <div ng-form="frmMain">
+
+        <div class="item row margin-bottom-twenty clearfix">
+            <div class="labels col-md-3 padding-right-zero pull-left">
+                <span>Layout Style</span>
+            </div>
+            <div class="main col-md-9 pull-left">
+                <div class="screens clearfix">
+                    <div class="screen layoutgrid pull-right margin-left-zero border-grey border-radius-three">
+                        <a class="layouticon border-radius-three default-background-hover text-center" ng-repeat="layout in availableLayouts" ng-click="changeLayout($index)" ng-style="data.design.selectedLayout - 1 == $index && {'border': '1px solid'}">
+                            <img ng-src="{{ layout }}">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="background"></div>
         <div class="item clearfix row">
             <div class="labels col-md-3 padding-right-zero pull-left" ng-show="data.design.backgroundImage">
@@ -28,9 +44,15 @@
     </div>
     <script>
         var textPluginApp = angular.module('textPluginDesign', []);
-        
+
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
             var background = new buildfire.components.images.thumbnail("#background", { title: "Background Image", dimensionsLabel: "750x1334" });
+
+            $scope.availableLayouts = [
+                "./layouts/layout1.png",
+                "./layouts/layout2.png"
+            ];
+
             /*
             * Go pull any previously saved data
             * */
@@ -48,13 +70,18 @@
                         },
                         design: {
                             backgroundImage: null,
-                            backgroundBlur: 0
+                            backgroundBlur: 0,
+                            selectedLayout: 1
                         }
                     };
                 }
 
                 if ($scope.data.design.backgroundImage) {
                     background.loadbackground($scope.data.design.backgroundImage);
+                }
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
                 }
                 /*
                  * watch for changes in data and trigger the saveData function on change
@@ -132,6 +159,19 @@
                     $scope.$apply();
                 }
             }
+
+            $scope.changeLayout = function (layoutId) {
+                if (!$scope.data.design) {
+                    $scope.data.design = {};
+                }
+                var newLayout = layoutId + 1;
+                if (newLayout != $scope.data.design.selectedLayout) {
+                    $scope.data.design.selectedLayout = newLayout;
+                    if (!$scope.$$phase && !$scope.$root.$$phase) {
+                        $scope.$apply();
+                    }
+                }
+            };
         }]);
     </script>
 </body>
