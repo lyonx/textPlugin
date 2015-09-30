@@ -46,34 +46,41 @@
         var textPluginApp = angular.module('textPluginDesign', []);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
-            var background = new buildfire.components.images.thumbnail("#background", { title: "Background Image", dimensionsLabel: "750x1334" });
+            var background = new buildfire.components.images.thumbnail("#background", { title: "Background Image", dimensionsLabel: "750x1334" }),
+                datastoreInitialized = false;
 
             $scope.availableLayouts = [
                 "./layouts/layout1.png",
                 "./layouts/layout2.png"
             ];
 
+            $scope.data = {
+                content: {
+                    carouselImages: [],
+                    text: "<p>&nbsp;<br></p>"
+                },
+                design: {
+                    backgroundImage: null,
+                    backgroundBlur: 0,
+                    selectedLayout: 1
+                }
+            };
+
             /*
             * Go pull any previously saved data
             * */
             buildfire.datastore.get(function (err, result) {
+
+                if (!err) {
+                    datastoreInitialized = true;
+                } else {
+                    console.error("Error: ", err);
+                    return;
+                }
+
                 if (result && result.data && !angular.equals({}, result.data)) {
                     $scope.data = result.data;
                     $scope.id = result.id;
-                    $scope.$digest();
-
-                } else {
-                    $scope.data = {
-                        content: {
-                            carouselImages: [],
-                            text: ""
-                        },
-                        design: {
-                            backgroundImage: null,
-                            backgroundBlur: 0,
-                            selectedLayout: 1
-                        }
-                    };
                 }
 
                 if ($scope.data.design.backgroundImage) {
@@ -87,12 +94,23 @@
                  * watch for changes in data and trigger the saveData function on change
                  * */
                 $scope.$watch('data', saveData, true);
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
             });
 
             /*
              * Call the datastore to save the data object
              * */
-            var saveData = function (newObj) {
+            var saveData = function (newObj, oldObj) {
+
+                if (!datastoreInitialized) {
+                    console.error("Error with datastore didn't get called");
+                    return;
+                }
+
+                if (angular.equals(newObj, oldObj)) return;
                 if (newObj == undefined) return;
                 if ($scope.frmMain.$invalid) {
                     console.warn('invalid data, details will not be saved');

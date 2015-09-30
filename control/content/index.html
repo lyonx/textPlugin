@@ -10,7 +10,6 @@
     <!-- JS -->
     <script src="../../../../scripts/buildfire.js"></script>
     <script src="../../../../scripts/angular/angular.min.js"></script>
-    <!--<script src="../../../../scripts/angular/ui-bootstrap.min.js"></script> -->
     <script src="../../../../scripts/tinymce/tinymce.min.js"></script>
     <script src="../../../../scripts/tinymce/ui-tinymce.js"></script>
 
@@ -43,6 +42,7 @@
         var textPluginApp = angular.module('textPlugin', [ 'ui.tinymce' ]);
 
         textPluginApp.controller('textPluginCtrl', ['$scope', function ($scope) {
+            var datastoreInitialized = false;
 
             $scope.editorOptions = {
                 plugins: 'advlist autolink link image lists charmap print preview',
@@ -51,49 +51,62 @@
                 theme: 'modern'
             };
 
-            /// create a new instance of the buildfire carousel editor
+            $scope.data = {
+                content: {
+                    carouselImages: [],
+                    text: "<p>&nbsp;<br></p>"
+                },
+                design: {
+                    backgroundImage: null,
+                    backgroundBlur: 0,
+                    selectedLayout: 1
+                }
+            };
+
+            // create a new instance of the buildfire carousel editor
             var editor = new buildfire.components.carousel.editor("#carousel");
 
             /*
              * Go pull any previously saved data
              * */
             buildfire.datastore.get(function (err, result) {
+
+                if (!err) {
+                    datastoreInitialized = true;
+                } else {
+                    console.error("Error: ", err);
+                    return;
+                }
+
                 if (result && result.data && !angular.equals({}, result.data)) {
                     $scope.data = result.data;
                     $scope.id = result.id;
                     if($scope.data.content && $scope.data.content.carouselImages)
                         editor.loadItems($scope.data.content.carouselImages);
                     if (tmrDelay) clearTimeout(tmrDelay);
-                } else {
-                    $scope.data = {
-                        content: {
-                            carouselImages: [],
-                            text: ""
-                        },
-                        design: {
-                            backgroundImage: null,
-                            backgroundBlur: 0,
-                            selectedLayout: 1
-                        }
-                    };
-                    editor.loadItems($scope.data.content.carouselImages);
                 }
 
-
-                if (!$scope.$$phase && !$scope.$root.$$phase) {
-                    $scope.$apply();
-                }
                 /*
                  * watch for changes in data and trigger the saveDataWithDelay function on change
                  * */
                 $scope.$watch('data', saveDataWithDelay, true);
+
+                if (!$scope.$$phase && !$scope.$root.$$phase) {
+                    $scope.$apply();
+                }
             });
 
             /*
              * Call the datastore to save the data object
              */
             var saveData = function (newObj) {
+                if (!datastoreInitialized) {
+                    console.error("Error with datastore didn't get called");
+                    return;
+                }
+
                 if (newObj == undefined) return;
+
                 if ($scope.frmMain.$invalid) {
                     console.warn('invalid data, details will not be saved');
                     return;
@@ -115,6 +128,7 @@
             var tmrDelay = null;
             var saveDataWithDelay = function (newObj, oldObj) {
                 if (tmrDelay) clearTimeout(tmrDelay);
+                if (angular.equals(newObj, oldObj)) return;
                 tmrDelay = setTimeout(function () {
                     saveData(newObj);
                 }, 500);
