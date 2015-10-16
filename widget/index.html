@@ -103,9 +103,9 @@
                 if ($scope.data.content && $scope.data.content.carouselImages) {
                     initDeviceSize(function () {
                         if (!view) {
-                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages, $scope.data.design.selectedLayout);
+                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
                         } else {
-                            view.loadItems($scope.data.content.carouselImages, null, $scope.data.design.selectedLayout);
+                            view.loadItems($scope.data.content.carouselImages, null, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
                         }
                     });
                 }
@@ -132,7 +132,7 @@
             buildfire.datastore.onRefresh(loadData);
 
             buildfire.datastore.onUpdate(function (e) {
-                loadData();
+                bind(e.data);
             });
 
             $scope.cropImage = function (url, settings) {
