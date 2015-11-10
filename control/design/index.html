@@ -19,7 +19,12 @@
             <div class="labels col-md-3 padding-right-zero pull-left">
                 <span>Layout Style</span>
             </div>
-            <div class="main col-md-9 pull-left">
+            <div class="screen layouticon pull-left col-md-3" >
+                <a class="screens clearfix" >
+                    <img  ng-src="{{ './layouts/layout' + data.design.selectedLayout + '.png'}}" >
+                </a>
+            </div>
+            <div class="main col-md-6 pull-left">
                 <div class="screens clearfix">
                     <div class="screen layoutgrid pull-right margin-left-zero border-grey border-radius-three">
                         <a class="layouticon border-radius-three default-background-hover text-center" ng-repeat="layout in availableLayouts" ng-click="changeLayout($index)" ng-style="data.design.selectedLayout - 1 == $index && {'border': '1px solid'}">
