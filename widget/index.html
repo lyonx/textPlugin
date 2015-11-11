@@ -19,12 +19,13 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 100%;			
         }
 
         .overlay.background {
                 position: fixed;
                 height: 100%;
+				z-index:-1;
             }
 
             .overlay.background img {
@@ -40,12 +41,7 @@
 		}
     </style>
     <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
-        <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}"
-             style="-webkit-filter: blur({{data.design.backgroundBlur}}px);
-             -moz-filter blur({{data.design.backgroundBlur}}px);
-             -o-filter blur({{data.design.backgroundBlur}}px);
-             -ms-filter blur({{data.design.backgroundBlur}}px);
-             filter blur({{data.design.backgroundBlur}}px);">
+        <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}" style="-webkit-filter: blur({{data.design.backgroundBlur}}px); -moz-filter blur({{data.design.backgroundBlur}}px); -o-filter blur({{data.design.backgroundBlur}}px); -ms-filter blur({{data.design.backgroundBlur}}px); filter blur({{data.design.backgroundBlur}}px);">
     </div>
     <div>
         <div id="carousel"></div>
