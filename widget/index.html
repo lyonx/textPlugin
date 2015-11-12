@@ -39,6 +39,14 @@
 		.widget-content {
 			word-break: break-word;
 		}
+		.widget-content ul, .widget-content ol {
+			margin-bottom: 10px;
+			margin-top: 0px;
+			padding-left: 40px;
+		}
+		.widget-content li {
+			list-style-type: disc;
+		}
     </style>
     <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
         <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}" style="-webkit-filter: blur({{data.design.backgroundBlur}}px); -moz-filter blur({{data.design.backgroundBlur}}px); -o-filter blur({{data.design.backgroundBlur}}px); -ms-filter blur({{data.design.backgroundBlur}}px); filter blur({{data.design.backgroundBlur}}px);">
