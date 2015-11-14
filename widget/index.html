@@ -13,36 +13,15 @@
     <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
 
 </head>
-<body ng-controller="textPluginCtrl" ng-cloak>
+<body ng-controller="textPluginCtrl" ng-cloak data-ng-attr-style="background:url({{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}) !important; background-size:cover;">
     <style>
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;			
-        }
-
-        .overlay.background {
-                position: fixed;
-                height: 100%;
-				z-index:-1;
-            }
-
-            .overlay.background img {
-                height: 100%;
-            }
-
         .owl-carousel .owl-controls .owl-dots {
             text-align: center;
-        }
-		
+        }		
 		.widget-content {
 			word-break: break-word;
 		}
     </style>
-    <div class="overlay background" ng-if="data.design.backgroundImage && deviceWidth != 0 && deviceHeight != 0">
-        <img ng-src="{{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}" style="-webkit-filter: blur({{data.design.backgroundBlur}}px); -moz-filter blur({{data.design.backgroundBlur}}px); -o-filter blur({{data.design.backgroundBlur}}px); -ms-filter blur({{data.design.backgroundBlur}}px); filter blur({{data.design.backgroundBlur}}px);">
-    </div>
     <div>
         <div id="carousel"></div>
         <div ng-bind-html="data.content.text" class="widget-content padded"></div>
