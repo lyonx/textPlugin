@@ -35,17 +35,6 @@
         </div>
 		<hr class="none">
         <div id="background"></div>
-		<hr class="none">
-        <div class="item clearfix row">
-            <div class="labels col-md-3 padding-right-zero pull-left" ng-show="data.design.backgroundImage">
-                <span>Blur Background</span>
-            </div>
-            <div class="main col-md-9 pull-right" ng-show="data.design.backgroundImage">
-                <div class="screens clearfix">
-                    <input id="slider1" type="range" min="0" max="8" step="1" ng-model="data.design.backgroundBlur" value="0" />
-                </div>
-            </div>
-        </div>
     </div>
     <script>
         var textPluginApp = angular.module('textPluginDesign', []);
