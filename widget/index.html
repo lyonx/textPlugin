@@ -22,14 +22,15 @@
 			word-break: break-word;
 		}
     </style>
-    <div>
+    <div data-ng-init="setWidth()">
         <div id="carousel"></div>
         <div ng-bind-html="data.content.text" class="widget-content padded"></div>
     </div>
     <script>
         var textPluginApp = angular.module('textPlugin', []);
 
-        textPluginApp.controller('textPluginCtrl', ['$scope', '$sce', function ($scope, $sce) {
+        textPluginApp.controller('textPluginCtrl', ['$scope',
+          '$sce','$rootScope', function ($scope, $sce,$rootScope) {
             var view = null;
 
             $scope.deviceHeight = window.innerHeight;
@@ -46,6 +47,10 @@
                     selectedLayout: 1
                 }
             };
+
+              $scope.setWidth = function () {
+                $rootScope.deviceWidth = window.innerWidth;
+             };
 
             function initDeviceSize(callback) {
                 $scope.deviceHeight = window.innerHeight;
