@@ -8,12 +8,14 @@
 
     <script src="../../../scripts/angular/angular.min.js"></script>
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
+    <script src="../../../scripts/smartcrop.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
     <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
     <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
 
 </head>
-<body ng-controller="textPluginCtrl" ng-cloak data-ng-attr-style="background:url({{ cropImage(data.design.backgroundImage, {width: deviceWidth, height: deviceHeight}) }}) !important; background-size:cover !important;">
+<body ng-controller="textPluginCtrl" ng-cloak
+      back-img="{{data.design.backgroundImage}}">
     <style>
         .owl-carousel .owl-controls .owl-dots {
             text-align: center;
@@ -165,7 +167,38 @@
                 }
             };
 
-        }]);
+        }])
+            .directive('backImg', ["$rootScope", function ($rootScope) {
+              return function (scope, element, attrs) {
+                attrs.$observe('backImg', function (value) {
+                  var img = '';
+                  if (value) {
+                    buildfire.imageLib.local.cropImage(value, {
+                      width: $rootScope.deviceWidth,
+                      height: $rootScope.deviceHeight
+                    }, function (err, imgUrl) {
+                      if (imgUrl) {
+                        img = imgUrl;
+                        element.attr("style", 'background:url(' + img + ') !important; background-size: cover !important;');
+                      } else {
+                        img = '';
+                        element.attr("style", 'background-color:white');
+                      }
+                      element.css({
+                        'background-size': 'cover'
+                      });
+                    });
+                  }
+                  else {
+                    img = "";
+                    element.attr("style", 'background-color:white');
+                    element.css({
+                      'background-size': 'cover'
+                    });
+                  }
+                });
+              };
+            }])
     </script>
 </body>
 
