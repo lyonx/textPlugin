@@ -10,22 +10,32 @@
     <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
     <script src="../../../scripts/smartcrop.js"></script>
     <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
-    <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
-    <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
+    <script src="../../../scripts/_bundles/buildfire_lightcarousel.min.js"></script>
 
 </head>
 <body ng-controller="textPluginCtrl" ng-cloak
       back-img="{{data.design.backgroundImage}}">
     <style>
-        .owl-carousel .owl-controls .owl-dots {
-            text-align: center;
-        }		
+        .hide {
+            display: none !important;
+        }
+
+        .show {
+            display: block !important;
+        }
+        #carousel {
+            width: 100%;
+            min-width:100%;
+            max-height: 56vw;
+            min-height: 56vw;
+            overflow-y: hidden;
+        }
 		.widget-content {
 			word-break: break-word;
 		}
     </style>
     <div data-ng-init="setWidth()">
-        <div id="carousel"></div>
+        <div id="carousel" class="sliderCarousel hide"></div>
         <div ng-bind-html="data.content.text" class="widget-content padded"></div>
     </div>
     <script>
@@ -78,23 +88,59 @@
                     }
                 }
             }
+            function initCarousel(carouselImages){
 
+                var carouselContainer = document.getElementById("carousel");
+                if (carouselImages && carouselImages.length > 0) {
+                    /*
+                     if more than one image add carousel else add image directly to the carousel container
+                     */
+                    if (carouselImages.length > 1) {
+
+                        var carousel = new buildfire.components.carousel.view({
+                            selector: carouselContainer,
+                            items: carouselImages,
+                            speed: 1000
+                        });
+
+                    } else {
+                        //add image directly to carousel container without adding the carousel lib
+                        carouselContainer.innerHTML = '';
+                        //append image tag
+                        var img = document.createElement('img');
+                        img.setAttribute("src", buildfire.imageLib.cropImage(carouselImages[0].iconUrl, {
+                            width: window.innerWidth,
+                            height: Math.ceil(9 * (window.innerWidth) / 16)
+                        }));
+                        img.alt = "Carousel Image";
+                        carouselContainer.appendChild(img);
+                        img.addEventListener("click", function () {
+                            buildfire.actionItems.execute(carouselImages[0], function (err, result) {
+                                if (err) {
+                                    console.warn('Error openning slider action: ', err);
+                                }
+                            });
+                        });
+                    }
+
+                    carouselContainer.classList.remove('hide');
+                } else {
+                    carouselContainer.classList.add('hide');
+                }
+
+            }
             /*
              * bind data to the scope
              * */
             function bind(data) {
                 $scope.data = data;
-                if (data && data.content && data.content.text) {
+                if (data && data.content && data.content.text && typeof(data.content.text)=="string") {
                     $scope.data.content.text = $sce.trustAsHtml(data.content.text);
                 }
 
                 if ($scope.data.content && $scope.data.content.carouselImages) {
                     initDeviceSize(function () {
-                        if (!view) {
-                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
-                        } else {
-                            view.loadItems($scope.data.content.carouselImages, null, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
-                        }
+                        initCarousel($scope.data.content.carouselImages);
                     });
                 }
 
@@ -151,21 +197,6 @@
                 bind(e.data);
             });
 
-            $scope.cropImage = function (url, settings) {
-                var options = {};
-                if (!url) {
-                    return "";
-                }
-                else {
-                    if (settings.height) {
-                        options.height = settings.height;
-                    }
-                    if (settings.width) {
-                        options.width = settings.width;
-                    }
-                    return buildfire.imageLib.cropImage(url, options);
-                }
-            };
 
         }])
             .directive('backImg', ["$rootScope", function ($rootScope) {
