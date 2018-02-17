@@ -3,26 +3,16 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Text widget</title>
-
-    <link href="../../../scripts/owlCarousel/owlCarousel.css" rel="stylesheet" />
-
-    <script src="../../../scripts/angular/angular.min.js"></script>
-    <script src="../../../scripts/jquery/jquery-1.11.2.min.js"></script>
-    <script src="../../../scripts/smartcrop.js"></script>
-    <script type="text/javascript" src="../../../scripts/buildfire.js"></script>
-    <script type="text/javascript" src="../../../scripts/owlCarousel/owlCarousel.js"></script>
-    <script src="../../../scripts/buildfire/components/carousel/carousel.js"></script>
+    <script type="text/javascript" src="../../../scripts/_bundles/jquery_angular_buildfire_smartcrop.min.js"></script>
+    <script src="../../../scripts/buildfire/components/carouselLight/carouselLight.min.js"></script>
 
 </head>
 <body ng-controller="textPluginCtrl" ng-cloak
       back-img="{{data.design.backgroundImage}}">
     <style>
-        .owl-carousel .owl-controls .owl-dots {
-            text-align: center;
-        }		
-		.widget-content {
-			word-break: break-word;
-		}
+  		.widget-content {
+  			word-break: break-word;
+  		}
     </style>
     <div data-ng-init="setWidth()">
         <div id="carousel"></div>
@@ -89,11 +79,21 @@
                 }
 
                 if ($scope.data.content && $scope.data.content.carouselImages) {
+                    let selector = document.getElementById('carousel');
                     initDeviceSize(function () {
                         if (!view) {
-                            view = new buildfire.components.carousel.view("#carousel", $scope.data.content.carouselImages, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
+                            view = new buildfire.components.carousel.view({
+                              selector,
+                              layout: $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema",
+                              items: $scope.data.content.carouselImages
+                            });
                         } else {
-                            view.loadItems($scope.data.content.carouselImages, null, $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema");
+                            view._destroySlider();
+                            view = new buildfire.components.carousel.view({
+                              selector,
+                              layout: $scope.data.design.selectedLayout == 1 ? "WideScreen" : "Cinema",
+                              items: $scope.data.content.carouselImages
+                            });
                         }
                     });
                 }
