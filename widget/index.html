@@ -3,16 +3,16 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Text widget</title>
+    <meta name="buildfire" content="disableBootstrap" />
     <script type="text/javascript" src="../../../scripts/_bundles/jquery_angular_buildfire_smartcrop.min.js"></script>
     <script src="../../../scripts/buildfire/components/carouselLight/carouselLight.min.js"></script>
-
 </head>
 <body ng-controller="textPluginCtrl" ng-cloak
       back-img="{{data.design.backgroundImage}}">
     <style>
-  		.widget-content {
-  			word-break: break-word;
-  		}
+      .widget-content {
+        word-break: break-word;
+      }
     </style>
     <div data-ng-init="setWidth()">
         <div id="carousel"></div>
