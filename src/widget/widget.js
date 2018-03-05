@@ -73,9 +73,11 @@ function render() {
   // Set background image if needed
   if (design && design.backgroundImage) {
     const DPR = window.devicePixelRatio;
+    const width = Math.ceil(state.width * DPR);
+    const height = Math.ceil(state.height * DPR);
 
     const baseUrl = 'https://czi3m2qn.cloudimg.io/s/crop';
-    const cropUrl = `${baseUrl}/${state.width * DPR}x${state.height * DPR}`;
+    const cropUrl = `${baseUrl}/${width}x${height}`;
     const url = `${cropUrl}/${design.backgroundImage}`;
 
     window.document.body.setAttribute('style', `
