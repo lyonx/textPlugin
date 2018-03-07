@@ -78,7 +78,12 @@ function render() {
     const cropUrl = `${baseUrl}/${state.width * DPR}x${state.height * DPR}`;
     const url = `${cropUrl}/${design.backgroundImage}`;
 
-    window.document.body.style.backgroundImage = `url(${url})`;
+    window.document.body.setAttribute('style', `
+      background-position: center !important;
+      background-size: cover !important;
+      background-attachment: fixed !important;
+      background-image: url(${url}) !important;
+    `);
   } else {
     window.document.body.style.backgroundImage = '';
   }
