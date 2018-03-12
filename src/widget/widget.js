@@ -92,6 +92,12 @@ function render() {
 
   // Render HTML content
   textContainer.innerHTML = content.text;
+
+  try {
+    buildfire.appearance.ready();
+  } catch (err) {
+    console.log('appearance.ready() failed, is sdk up to date?');
+  }
 }
 
 
