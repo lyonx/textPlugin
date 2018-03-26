@@ -72,18 +72,14 @@ function render() {
 
   // Set background image if needed
   if (design && design.backgroundImage) {
-    const DPR = window.devicePixelRatio;
-    const width = Math.ceil(state.width * DPR);
-    const height = Math.ceil(state.height * DPR);
+    const width = Math.ceil(state.width);
+    const height = Math.ceil(state.height);
 
-    const baseUrl = 'https://czi3m2qn.cloudimg.io/s/crop';
-    const cropUrl = `${baseUrl}/${width}x${height}`;
-    const url = `${cropUrl}/${design.backgroundImage}`;
+    const baseUrl = 'https://czi3m2qn.cloudimg.io/cdn/n/n';
+    const url = `${baseUrl}/${design.backgroundImage}?h=${height}&w=${width}`;
 
     window.document.body.setAttribute('style', `
-      background-position: center !important;
       background-size: cover !important;
-      background-attachment: fixed !important;
       background-image: url(${url}) !important;
     `);
   } else {
