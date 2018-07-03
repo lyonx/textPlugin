@@ -47,7 +47,10 @@
                 skin: 'lightgray',
                 trusted: true,
                 theme: 'modern',
-                format: 'html'
+                format: 'html',
+                convert_urls : false,
+                relative_urls : false
+
             };
 
             $scope.data = {
@@ -129,7 +132,9 @@
                     console.error("Error with datastore didn't get called");
                     return;
                 }
-
+                if(newObj.content.text.indexOf("src=\"//")!=-1){
+                    newObj.content.text= newObj.content.text.replace("src=\"//","src=\"https://")
+                }
                 if (newObj == undefined) return;
 
                 if ($scope.frmMain.$invalid) {
